@@ -61,7 +61,19 @@ export const translations = {
 		sortBy: 'Sort by',
 		sortByPage: 'Page',
 		sortByCriteria: 'Criteria',
-		sortByPriority: 'Priority'
+		sortByPriority: 'Priority',
+		copyWeeklyReport: 'Copy Weekly Report',
+		weeklyReport: 'Weekly Report',
+		thisWeek: 'This week',
+		totalIssuesFound: 'a total of',
+		followingCriteria: 'issues were found for this product in the following criteria:',
+		comparisonPrevious: 'In comparison to the previous week, the number of issues found has gone',
+		issuesGoneUp: 'up by',
+		issuesGoneDown: 'down by',
+		issuesStayedSame: 'stayed the same.',
+		noIssuesPreviousWeek: 'No issues were found in the previous week for comparison.',
+		noIssuesThisWeek: 'No issues were found this week.',
+		weeklyReportCopied: 'Weekly report copied to clipboard'
 	},
 	es: {
 		appTitle: 'Gestor de Informes de Accesibilidad',
@@ -125,7 +137,19 @@ export const translations = {
 		sortBy: 'Ordenar por',
 		sortByPage: 'Página',
 		sortByCriteria: 'Criterio',
-		sortByPriority: 'Prioridad'
+		sortByPriority: 'Prioridad',
+		copyWeeklyReport: 'Copiar Informe Semanal',
+		weeklyReport: 'Informe Semanal',
+		thisWeek: 'Esta semana',
+		totalIssuesFound: 'se encontraron un total de',
+		followingCriteria: 'problemas para este producto en los siguientes criterios:',
+		comparisonPrevious: 'En comparación con la semana anterior, el número de problemas encontrados ha',
+		issuesGoneUp: 'aumentado en',
+		issuesGoneDown: 'disminuido en',
+		issuesStayedSame: 'permanecido igual.',
+		noIssuesPreviousWeek: 'No se encontraron problemas la semana anterior para comparar.',
+		noIssuesThisWeek: 'No se encontraron problemas esta semana.',
+		weeklyReportCopied: 'Informe semanal copiado al portapapeles'
 	}
 };
 

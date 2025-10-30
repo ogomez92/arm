@@ -4,6 +4,7 @@
 	import type { Report, Issue } from './lib/types';
 	import { ReportStorage } from './lib/services/storage';
 	import { HTMLExport } from './lib/services/html-export';
+	import { generateWeeklyReport, type WeeklyReportTranslations } from './lib/services/weekly-report';
 	import IssuesTable from './lib/components/IssuesTable.svelte';
 	import IssueForm from './lib/components/IssueForm.svelte';
 	import Announcer from './lib/components/Announcer.svelte';
@@ -274,6 +275,36 @@
 			HTMLExport.downloadHTML(report, $currentLanguage, sortBy);
 		}
 	}
+
+	async function copyWeeklyReport() {
+		if (!report) return;
+
+		try {
+			const translations: WeeklyReportTranslations = {
+				weeklyReport: $t('weeklyReport'),
+				thisWeek: $t('thisWeek'),
+				totalIssuesFound: $t('totalIssuesFound'),
+				followingCriteria: $t('followingCriteria'),
+				comparisonPrevious: $t('comparisonPrevious'),
+				issuesGoneUp: $t('issuesGoneUp'),
+				issuesGoneDown: $t('issuesGoneDown'),
+				issuesStayedSame: $t('issuesStayedSame'),
+				noIssuesPreviousWeek: $t('noIssuesPreviousWeek'),
+				noIssuesThisWeek: $t('noIssuesThisWeek')
+			};
+
+			const markdown = generateWeeklyReport(report, translations, $currentLanguage);
+			await navigator.clipboard.writeText(markdown);
+
+			announcement = $t('weeklyReportCopied');
+			setTimeout(() => {
+				announcement = '';
+			}, 3000);
+		} catch (error) {
+			console.error('Failed to copy weekly report:', error);
+			alert($t('error') + ': ' + (error as Error).message);
+		}
+	}
 </script>
 
 <Announcer bind:message={announcement} />
@@ -328,6 +359,9 @@
 					</button>
 					<button type="button" onclick={downloadHTML} class="btn-secondary">
 						{$t('downloadHTML')}
+					</button>
+					<button type="button" onclick={copyWeeklyReport} class="btn-secondary">
+						{$t('copyWeeklyReport')}
 					</button>
 				</div>
 			</div>
