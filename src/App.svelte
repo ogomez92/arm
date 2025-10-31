@@ -290,7 +290,11 @@
 				issuesGoneDown: $t('issuesGoneDown'),
 				issuesStayedSame: $t('issuesStayedSame'),
 				noIssuesPreviousWeek: $t('noIssuesPreviousWeek'),
-				noIssuesThisWeek: $t('noIssuesThisWeek')
+				noIssuesThisWeek: $t('noIssuesThisWeek'),
+				ofWhich: $t('ofWhich'),
+				areBlocker: $t('areBlocker'),
+				areMedium: $t('areMedium'),
+				areLow: $t('areLow')
 			};
 
 			const markdown = generateWeeklyReport(report, translations, $currentLanguage);

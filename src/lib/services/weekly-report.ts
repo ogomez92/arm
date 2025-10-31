@@ -72,6 +72,25 @@ export function calculateCriteriaPercentages(issues: Issue[], language: Language
 }
 
 /**
+ * Count issues by priority
+ */
+export function countIssuesByPriority(issues: Issue[]): { blocker: number; medium: number; low: number } {
+	const counts = { blocker: 0, medium: 0, low: 0 };
+
+	issues.forEach(issue => {
+		if (issue.priority === 3) {
+			counts.blocker++;
+		} else if (issue.priority === 2) {
+			counts.medium++;
+		} else if (issue.priority === 1) {
+			counts.low++;
+		}
+	});
+
+	return counts;
+}
+
+/**
  * Calculate percentage change between two weeks
  */
 export function calculatePercentageChange(currentWeekCount: number, previousWeekCount: number): { direction: 'up' | 'down' | 'same'; percentage: number } {
@@ -105,6 +124,10 @@ export interface WeeklyReportTranslations {
 	issuesStayedSame: string;
 	noIssuesPreviousWeek: string;
 	noIssuesThisWeek: string;
+	ofWhich: string;
+	areBlocker: string;
+	areMedium: string;
+	areLow: string;
 }
 
 export function generateWeeklyReport(
@@ -126,7 +149,26 @@ export function generateWeeklyReport(
 	}
 
 	// Current week summary
-	markdown += `${translations.thisWeek}, ${translations.totalIssuesFound} **${currentWeekCount}** ${translations.followingCriteria}\n\n`;
+	const currentWeekPriorities = countIssuesByPriority(currentWeekIssues);
+	markdown += `${translations.thisWeek}, ${translations.totalIssuesFound} **${currentWeekCount}** ${translations.followingCriteria}`;
+
+	// Add priority breakdown for current week
+	const priorityParts: string[] = [];
+	if (currentWeekPriorities.blocker > 0) {
+		priorityParts.push(`${currentWeekPriorities.blocker} ${translations.areBlocker}`);
+	}
+	if (currentWeekPriorities.medium > 0) {
+		priorityParts.push(`${currentWeekPriorities.medium} ${translations.areMedium}`);
+	}
+	if (currentWeekPriorities.low > 0) {
+		priorityParts.push(`${currentWeekPriorities.low} ${translations.areLow}`);
+	}
+
+	if (priorityParts.length > 0) {
+		markdown += ` (${translations.ofWhich} ${priorityParts.join(', ')})`;
+	}
+
+	markdown += `\n\n`;
 
 	// Breakdown by criteria
 	const criteriaPercentages = calculateCriteriaPercentages(currentWeekIssues, language);
@@ -144,14 +186,33 @@ export function generateWeeklyReport(
 	if (previousWeekCount > 0) {
 		markdown += `\n`;
 		const change = calculatePercentageChange(currentWeekCount, previousWeekCount);
+		const previousWeekPriorities = countIssuesByPriority(previousWeekIssues);
 
 		if (change.direction === 'up') {
-			markdown += `${translations.comparisonPrevious} ${translations.issuesGoneUp} **+${change.percentage}%**.\n`;
+			markdown += `${translations.comparisonPrevious} ${translations.issuesGoneUp} **+${change.percentage}%**`;
 		} else if (change.direction === 'down') {
-			markdown += `${translations.comparisonPrevious} ${translations.issuesGoneDown} **-${change.percentage}%**.\n`;
+			markdown += `${translations.comparisonPrevious} ${translations.issuesGoneDown} **-${change.percentage}%**`;
 		} else {
-			markdown += `${translations.comparisonPrevious} ${translations.issuesStayedSame}\n`;
+			markdown += `${translations.comparisonPrevious} ${translations.issuesStayedSame}`;
 		}
+
+		// Add priority breakdown for previous week
+		const prevPriorityParts: string[] = [];
+		if (previousWeekPriorities.blocker > 0) {
+			prevPriorityParts.push(`${previousWeekPriorities.blocker} ${translations.areBlocker}`);
+		}
+		if (previousWeekPriorities.medium > 0) {
+			prevPriorityParts.push(`${previousWeekPriorities.medium} ${translations.areMedium}`);
+		}
+		if (previousWeekPriorities.low > 0) {
+			prevPriorityParts.push(`${previousWeekPriorities.low} ${translations.areLow}`);
+		}
+
+		if (prevPriorityParts.length > 0) {
+			markdown += ` (${translations.ofWhich} ${prevPriorityParts.join(', ')} last week)`;
+		}
+
+		markdown += `.\n`;
 	} else {
 		markdown += `\n${translations.noIssuesPreviousWeek}\n`;
 	}

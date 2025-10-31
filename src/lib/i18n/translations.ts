@@ -73,7 +73,11 @@ export const translations = {
 		issuesStayedSame: 'stayed the same.',
 		noIssuesPreviousWeek: 'No issues were found in the previous week for comparison.',
 		noIssuesThisWeek: 'No issues were found this week.',
-		weeklyReportCopied: 'Weekly report copied to clipboard'
+		weeklyReportCopied: 'Weekly report copied to clipboard',
+		ofWhich: 'of which',
+		areBlocker: 'are blocker',
+		areMedium: 'are medium',
+		areLow: 'are low'
 	},
 	es: {
 		appTitle: 'Gestor de Informes de Accesibilidad',
@@ -149,7 +153,11 @@ export const translations = {
 		issuesStayedSame: 'permanecido igual.',
 		noIssuesPreviousWeek: 'No se encontraron problemas la semana anterior para comparar.',
 		noIssuesThisWeek: 'No se encontraron problemas esta semana.',
-		weeklyReportCopied: 'Informe semanal copiado al portapapeles'
+		weeklyReportCopied: 'Informe semanal copiado al portapapeles',
+		ofWhich: 'de los cuales',
+		areBlocker: 'son bloqueantes',
+		areMedium: 'son medios',
+		areLow: 'son bajos'
 	}
 };
 
