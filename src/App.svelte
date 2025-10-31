@@ -5,14 +5,11 @@
 	import { ReportStorage } from './lib/services/storage';
 	import { HTMLExport } from './lib/services/html-export';
 	import { generateWeeklyReport, type WeeklyReportTranslations } from './lib/services/weekly-report';
+	import { IndexedDBStorage, type SortBy } from './lib/services/indexdb-storage';
 	import IssuesTable from './lib/components/IssuesTable.svelte';
 	import IssueForm from './lib/components/IssueForm.svelte';
 	import Announcer from './lib/components/Announcer.svelte';
-
-	const STORAGE_KEY = 'a11y-reporter-current-report';
-	const SORT_STORAGE_KEY = 'a11y-reporter-sort-preference';
-
-	type SortBy = 'page' | 'criteria' | 'priority';
+	import ExportDropdown from './lib/components/ExportDropdown.svelte';
 
 	let report = $state<Report | null>(null);
 	let selectedPage = $state<string>('__all__');
@@ -28,6 +25,7 @@
 	let issueFormTriggerElement: HTMLElement | null = null;
 	let previousFilteredCount = $state<number | null>(null);
 	let sortBy = $state<SortBy>('priority');
+	let hasLoadedInitially = $state(false);
 
 	const filteredIssues = $derived(
 		report
@@ -37,34 +35,64 @@
 			: []
 	);
 
-	// Load saved report from localStorage on mount
-	onMount(() => {
+	// Load saved report from IndexedDB on mount and migrate from localStorage if needed
+	onMount(async () => {
+		console.log('=== onMount started ===');
+		console.log('Initial report state:', report);
+		console.log('Initial hasLoadedInitially:', hasLoadedInitially);
+
 		try {
-			const saved = localStorage.getItem(STORAGE_KEY);
+			// First, try to migrate from localStorage
+			console.log('Starting migration check...');
+			await IndexedDBStorage.migrateFromLocalStorage();
+			console.log('Migration check completed');
+
+			// Then load from IndexedDB
+			console.log('Loading report from IndexedDB...');
+			const saved = await IndexedDBStorage.loadCurrentReport();
+			console.log('Load result:', saved ? `Found report: ${saved.name}` : 'No report found');
+
 			if (saved) {
-				report = JSON.parse(saved) as Report;
+				console.log('Setting report state...');
+				report = saved;
+				console.log('Report state set successfully');
 			}
 
-			const savedSort = localStorage.getItem(SORT_STORAGE_KEY);
-			if (savedSort && ['page', 'criteria', 'priority'].includes(savedSort)) {
-				sortBy = savedSort as SortBy;
+			const savedSort = await IndexedDBStorage.loadSortPreference();
+			if (savedSort) {
+				sortBy = savedSort;
 			}
 		} catch (error) {
 			console.error('Failed to load saved report:', error);
-			localStorage.removeItem(STORAGE_KEY);
+		} finally {
+			// Mark that we've completed the initial load
+			console.log('Setting hasLoadedInitially to true');
+			hasLoadedInitially = true;
+			console.log('=== onMount completed ===');
 		}
 	});
 
-	// Auto-save report to localStorage whenever it changes
+	// Auto-save report to IndexedDB whenever it changes
 	$effect(() => {
+		// Don't run until after initial load to avoid deleting the report during mount
+		if (!hasLoadedInitially) {
+			return;
+		}
+
 		if (report) {
-			try {
-				localStorage.setItem(STORAGE_KEY, JSON.stringify(report));
-			} catch (error) {
-				console.error('Failed to save report:', error);
-			}
+			console.log('$effect triggered - saving report to IndexedDB:', report.name);
+			IndexedDBStorage.saveCurrentReport(report)
+				.then(() => {
+					console.log('Report auto-save completed successfully');
+				})
+				.catch((error) => {
+					console.error('Failed to save report:', error);
+				});
 		} else {
-			localStorage.removeItem(STORAGE_KEY);
+			console.log('$effect triggered - report is null, deleting from IndexedDB');
+			IndexedDBStorage.deleteCurrentReport().catch((error) => {
+				console.error('Failed to delete report:', error);
+			});
 		}
 	});
 
@@ -172,13 +200,6 @@
 		}
 	}
 
-	function handleLabelKeydown(e: KeyboardEvent) {
-		if (e.key === 'Enter' || e.key === ' ') {
-			e.preventDefault();
-			fileInput?.click();
-		}
-	}
-
 	function handleAddIssue(e: Event) {
 		issueFormTriggerElement = e.target as HTMLElement;
 		showAddForm = true;
@@ -257,14 +278,12 @@
 
 	function handleSortChange(newSortBy: SortBy) {
 		sortBy = newSortBy;
-		try {
-			localStorage.setItem(SORT_STORAGE_KEY, sortBy);
-		} catch (error) {
+		IndexedDBStorage.saveSortPreference(sortBy).catch((error) => {
 			console.error('Failed to save sort preference:', error);
-		}
+		});
 	}
 
-	function downloadDatabase() {
+	function downloadJSON() {
 		if (report) {
 			ReportStorage.downloadReport(report);
 		}
@@ -275,6 +294,19 @@
 			HTMLExport.downloadHTML(report, $currentLanguage, sortBy);
 		}
 	}
+
+	const exportMenuItems = $derived([
+		{
+			id: 'download-json',
+			label: $t('downloadJSON'),
+			onClick: downloadJSON
+		},
+		{
+			id: 'download-html',
+			label: $t('downloadHTML'),
+			onClick: downloadHTML
+		}
+	]);
 
 	async function copyWeeklyReport() {
 		if (!report) return;
@@ -332,14 +364,6 @@
 			<div class="welcome">
 				<h2>{$t('noReportLoaded')}</h2>
 				<div class="welcome-actions">
-					<label
-						for="fileInput"
-						class="btn-primary"
-						tabindex="0"
-					onkeydown={handleLabelKeydown}
-					>
-						{$t('uploadReport')}
-					</label>
 					<button type="button" onclick={(e) => showCreateNewDialog(e)} class="btn-primary">
 						{$t('createNewReport')}
 					</button>
@@ -358,12 +382,7 @@
 					<button type="button" onclick={(e) => showCreateNewDialog(e)} class="btn-secondary">
 						{$t('createNewReport')}
 					</button>
-					<button type="button" onclick={downloadDatabase} class="btn-secondary">
-						{$t('downloadDatabase')}
-					</button>
-					<button type="button" onclick={downloadHTML} class="btn-secondary">
-						{$t('downloadHTML')}
-					</button>
+					<ExportDropdown buttonLabel={$t('export')} items={exportMenuItems} />
 					<button type="button" onclick={copyWeeklyReport} class="btn-secondary">
 						{$t('copyWeeklyReport')}
 					</button>
@@ -402,6 +421,7 @@
 	</main>
 </div>
 
+<label for="fileInput" class="sr-only">{$t('uploadReport')}</label>
 <input
 	type="file"
 	id="fileInput"
@@ -645,12 +665,10 @@
 		box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.25);
 	}
 
-	.form-section,
 	.issues-section {
 		margin-bottom: 2rem;
 	}
 
-	.form-section h3,
 	.issues-section h3 {
 		margin: 0 0 1rem 0;
 		font-size: 1.25rem;
