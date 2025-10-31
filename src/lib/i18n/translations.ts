@@ -78,7 +78,14 @@ export const translations = {
 		ofWhich: 'of which',
 		areBlocker: 'are blocker',
 		areMedium: 'are medium',
-		areLow: 'are low'
+		areLow: 'are low',
+		aboutThisApp: 'About this app',
+		savedLocally: 'Your reports are saved locally in your browser using IndexedDB',
+		downloadOptions: 'You can download your reports as JSON or HTML at any time',
+		noServerStorage: 'Your data is never sent to or saved on any server - everything stays on your device',
+		weeklyReports: 'Generate weekly reports that you can copy and paste into Slack, Teams, or any other messaging platform',
+		feedbackContact: 'For feedback or questions, reach out to',
+		onLinkedIn: 'on LinkedIn'
 	},
 	es: {
 		appTitle: 'Gestor de Informes de Accesibilidad',
@@ -159,7 +166,14 @@ export const translations = {
 		ofWhich: 'de los cuales',
 		areBlocker: 'son bloqueantes',
 		areMedium: 'son medios',
-		areLow: 'son bajos'
+		areLow: 'son bajos',
+		aboutThisApp: 'Acerca de esta aplicación',
+		savedLocally: 'Tus informes se guardan localmente en tu navegador usando IndexedDB',
+		downloadOptions: 'Puedes descargar tus informes como JSON o HTML en cualquier momento',
+		noServerStorage: 'Tus datos nunca se envían ni se guardan en ningún servidor - todo permanece en tu dispositivo',
+		weeklyReports: 'Genera informes semanales que puedes copiar y pegar en Slack, Teams o cualquier otra plataforma de mensajería',
+		feedbackContact: 'Para comentarios o preguntas, contacta a',
+		onLinkedIn: 'en LinkedIn'
 	}
 };
 

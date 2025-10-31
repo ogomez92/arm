@@ -363,10 +363,38 @@
 		{#if !report}
 			<div class="welcome">
 				<h2>{$t('noReportLoaded')}</h2>
+
 				<div class="welcome-actions">
-					<button type="button" onclick={(e) => showCreateNewDialog(e)} class="btn-primary">
+					<button
+						type="button"
+						onclick={(e) => showCreateNewDialog(e)}
+						class="btn-primary"
+						aria-haspopup="dialog"
+						aria-expanded={showCreateDialog}
+					>
 						{$t('createNewReport')}
 					</button>
+				</div>
+
+				<div class="onboarding">
+					<h3>{$t('aboutThisApp')}</h3>
+					<ul>
+						<li>{$t('savedLocally')}</li>
+						<li>{$t('downloadOptions')}</li>
+						<li>{$t('noServerStorage')}</li>
+						<li>{$t('weeklyReports')}</li>
+						<li>
+							{$t('feedbackContact')}
+							<a
+								href="https://linkedin.com/in/ogomez92"
+								target="_blank"
+								rel="noopener noreferrer"
+							>
+								Oriol Gómez Sentís
+							</a>
+							{$t('onLinkedIn')}
+						</li>
+					</ul>
 				</div>
 			</div>
 		{:else}
@@ -379,7 +407,13 @@
 					</p>
 				</div>
 				<div class="report-actions">
-					<button type="button" onclick={(e) => showCreateNewDialog(e)} class="btn-secondary">
+					<button
+						type="button"
+						onclick={(e) => showCreateNewDialog(e)}
+						class="btn-secondary"
+						aria-haspopup="dialog"
+						aria-expanded={showCreateDialog}
+					>
 						{$t('createNewReport')}
 					</button>
 					<ExportDropdown buttonLabel={$t('export')} items={exportMenuItems} />
@@ -400,9 +434,16 @@
 					</select>
 				</div>
 
-			<button type="button" bind:this={addIssueButton} onclick={(e) => handleAddIssue(e)} class="btn-primary">
+			<button
+				type="button"
+				bind:this={addIssueButton}
+				onclick={(e) => handleAddIssue(e)}
+				class="btn-primary"
+				aria-haspopup="dialog"
+				aria-expanded={showAddForm}
+			>
 				{$t('addNewIssue')}
-					</button>
+			</button>
 			</div>
 
 
@@ -584,6 +625,8 @@
 	.welcome {
 		text-align: center;
 		padding: 4rem 1rem;
+		max-width: 800px;
+		margin: 0 auto;
 	}
 
 	.welcome h2 {
@@ -596,6 +639,54 @@
 		justify-content: center;
 		gap: 1rem;
 		flex-wrap: wrap;
+		margin-bottom: 3rem;
+	}
+
+	.onboarding {
+		background-color: #f8f9fa;
+		border: 1px solid #dee2e6;
+		border-radius: 8px;
+		padding: 2rem;
+		text-align: left;
+		margin-top: 2rem;
+	}
+
+	.onboarding h3 {
+		margin: 0 0 1rem 0;
+		font-size: 1.25rem;
+		color: #1a1a1a;
+	}
+
+	.onboarding ul {
+		list-style-type: disc;
+		padding-left: 1.5rem;
+		margin: 0;
+	}
+
+	.onboarding li {
+		margin-bottom: 0.75rem;
+		line-height: 1.6;
+		color: #212529;
+	}
+
+	.onboarding li:last-child {
+		margin-bottom: 0;
+	}
+
+	.onboarding a {
+		color: #0066cc;
+		text-decoration: none;
+		font-weight: 500;
+	}
+
+	.onboarding a:hover {
+		text-decoration: underline;
+	}
+
+	.onboarding a:focus {
+		outline: 2px solid #0066cc;
+		outline-offset: 2px;
+		border-radius: 2px;
 	}
 
 	.file-input {
