@@ -6,10 +6,13 @@
 	import { HTMLExport } from './lib/services/html-export';
 	import { generateWeeklyReport, type WeeklyReportTranslations } from './lib/services/weekly-report';
 	import { IndexedDBStorage, type SortBy } from './lib/services/indexdb-storage';
+	import type { AxeScanMessage } from './lib/services/axe-snippet';
 	import IssuesTable from './lib/components/IssuesTable.svelte';
 	import IssueForm from './lib/components/IssueForm.svelte';
 	import Announcer from './lib/components/Announcer.svelte';
 	import ExportDropdown from './lib/components/ExportDropdown.svelte';
+	import AxeScanDialog from './lib/components/AxeScanDialog.svelte';
+	import AxeResultsPage from './lib/components/AxeResultsPage.svelte';
 
 	let report = $state<Report | null>(null);
 	let selectedPage = $state<string>('__all__');
@@ -26,6 +29,9 @@
 	let previousFilteredCount = $state<number | null>(null);
 	let sortBy = $state<SortBy>('priority');
 	let hasLoadedInitially = $state(false);
+	let showAxeScanDialog = $state(false);
+	let axeScanData = $state<AxeScanMessage | null>(null);
+	let axeScanTriggerElement: HTMLElement | null = null;
 
 	const filteredIssues = $derived(
 		report
@@ -70,6 +76,24 @@
 			hasLoadedInitially = true;
 			console.log('=== onMount completed ===');
 		}
+
+		// Listen for axe scan results from console snippet via BroadcastChannel
+		const channel = new BroadcastChannel('axe-scan-results');
+
+		const handleAxeMessage = (event: MessageEvent) => {
+			// Check if this is an axe scan result message
+			if (event.data?.type === 'AXE_SCAN_RESULTS') {
+				console.log('Received axe scan results via BroadcastChannel');
+				axeScanData = event.data as AxeScanMessage;
+			}
+		};
+
+		channel.addEventListener('message', handleAxeMessage);
+
+		// Cleanup
+		return () => {
+			channel.close();
+		};
 	});
 
 	// Auto-save report to IndexedDB whenever it changes
@@ -341,6 +365,64 @@
 			alert($t('error') + ': ' + (error as Error).message);
 		}
 	}
+
+	function handleOpenAxeScan(e: Event) {
+		axeScanTriggerElement = e.target as HTMLElement;
+		showAxeScanDialog = true;
+	}
+
+	function handleCloseAxeScan() {
+		showAxeScanDialog = false;
+		returnAxeScanFocus();
+	}
+
+	function returnAxeScanFocus() {
+		setTimeout(() => {
+			axeScanTriggerElement?.focus();
+			axeScanTriggerElement = null;
+		}, 0);
+	}
+
+	function handleSaveAxeResults(issues: any[]) {
+		if (!report) {
+			// Create a new report if none exists
+			const newReportName = axeScanData?.pageTitle || 'Axe Scan Report';
+			report = ReportStorage.createNewReport(newReportName);
+		}
+
+		// Add each issue to the report
+		issues.forEach((axeIssue) => {
+			if (report) {
+				report = ReportStorage.addIssue(report, {
+					page: axeIssue.pageTitle,
+					criterionNumber: axeIssue.criterionNumber,
+					title: axeIssue.title,
+					description: axeIssue.description,
+					location: axeIssue.location,
+					screenshot: axeIssue.screenshot,
+					notes: axeIssue.notes,
+					priority: axeIssue.priority
+				});
+			}
+		});
+
+		// Clear axe scan data and show success message
+		axeScanData = null;
+		announcement = `${issues.length} issues added to report`;
+		setTimeout(() => {
+			announcement = '';
+		}, 3000);
+	}
+
+	function handleCancelAxeResults() {
+		axeScanData = null;
+	}
+
+	function handleImportAxeResults(data: AxeScanMessage) {
+		console.log('Importing axe scan results:', data);
+		axeScanData = data;
+		showAxeScanDialog = false;
+	}
 </script>
 
 <Announcer bind:message={announcement} />
@@ -373,6 +455,15 @@
 						aria-expanded={showCreateDialog}
 					>
 						{$t('createNewReport')}
+					</button>
+					<button
+						type="button"
+						onclick={(e) => handleOpenAxeScan(e)}
+						class="btn-secondary"
+						aria-haspopup="dialog"
+						aria-expanded={showAxeScanDialog}
+					>
+						{$t('scanWithAxe')}
 					</button>
 				</div>
 
@@ -415,6 +506,15 @@
 						aria-expanded={showCreateDialog}
 					>
 						{$t('createNewReport')}
+					</button>
+					<button
+						type="button"
+						onclick={(e) => handleOpenAxeScan(e)}
+						class="btn-secondary"
+						aria-haspopup="dialog"
+						aria-expanded={showAxeScanDialog}
+					>
+						{$t('scanWithAxe')}
 					</button>
 					<ExportDropdown buttonLabel={$t('export')} items={exportMenuItems} />
 					<button type="button" onclick={copyWeeklyReport} class="btn-secondary">
@@ -549,6 +649,18 @@
 			/>
 		</div>
 	</div>
+{/if}
+
+{#if showAxeScanDialog}
+	<AxeScanDialog onClose={handleCloseAxeScan} onImportResults={handleImportAxeResults} />
+{/if}
+
+{#if axeScanData}
+	<AxeResultsPage
+		scanData={axeScanData}
+		onSave={handleSaveAxeResults}
+		onCancel={handleCancelAxeResults}
+	/>
 {/if}
 
 <style>

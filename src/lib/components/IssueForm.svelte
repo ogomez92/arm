@@ -242,14 +242,14 @@
 		<label for="location">
 			{$t('issueLocation')} <span class="required-indicator">({$t('required')})</span>
 		</label>
-		<input
-			type="text"
+		<textarea
 			id="location"
 			bind:value={formData.location}
+			rows="3"
 			aria-required="true"
 			aria-invalid={!!errors.location}
 			aria-describedby={errors.location ? 'location-error' : undefined}
-		/>
+		></textarea>
 		{#if errors.location}
 			<div id="location-error" class="error" role="alert">{errors.location}</div>
 		{/if}
