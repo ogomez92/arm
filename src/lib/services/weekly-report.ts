@@ -111,19 +111,26 @@ export function calculatePercentageChange(currentWeekCount: number, previousWeek
 }
 
 /**
- * Generate weekly report in markdown format
+ * Format priority list with proper grammar (using "and" before the last item)
+ */
+function formatPriorityList(parts: string[]): string {
+	if (parts.length === 0) return '';
+	if (parts.length === 1) return parts[0];
+	if (parts.length === 2) return `${parts[0]} and ${parts[1]}`;
+	// For 3 or more items, use commas and "and" before the last item
+	const allButLast = parts.slice(0, -1).join(', ');
+	return `${allButLast}, and ${parts[parts.length - 1]}`;
+}
+
+/**
+ * Generate weekly report in markdown format based on a start date
  */
 export interface WeeklyReportTranslations {
 	weeklyReport: string;
-	thisWeek: string;
+	since: string;
 	totalIssuesFound: string;
 	followingCriteria: string;
-	comparisonPrevious: string;
-	issuesGoneUp: string;
-	issuesGoneDown: string;
-	issuesStayedSame: string;
-	noIssuesPreviousWeek: string;
-	noIssuesThisWeek: string;
+	noIssuesFound: string;
 	ofWhich: string;
 	areBlocker: string;
 	areMedium: string;
@@ -132,46 +139,49 @@ export interface WeeklyReportTranslations {
 
 export function generateWeeklyReport(
 	report: Report,
+	startDate: Date,
 	translations: WeeklyReportTranslations,
 	language: Language = 'en'
 ): string {
-	const currentWeekIssues = getWeeklyIssues(report.issues, 0);
-	const previousWeekIssues = getWeeklyIssues(report.issues, -1);
+	// Get all issues since the start date
+	const endDate = new Date(); // Now
+	const issuesSinceDate = filterIssuesByDateRange(report.issues, startDate, endDate);
+	const issueCount = issuesSinceDate.length;
 
-	const currentWeekCount = currentWeekIssues.length;
-	const previousWeekCount = previousWeekIssues.length;
+	// Format the date as M/D/YYYY
+	const formattedDate = `${startDate.getMonth() + 1}/${startDate.getDate()}/${startDate.getFullYear()}`;
 
 	let markdown = `# ${report.name} ${translations.weeklyReport}\n\n`;
 
-	if (currentWeekCount === 0) {
-		markdown += `${translations.noIssuesThisWeek}\n`;
+	if (issueCount === 0) {
+		markdown += `${translations.since} ${formattedDate}: ${translations.noIssuesFound}\n`;
 		return markdown;
 	}
 
-	// Current week summary
-	const currentWeekPriorities = countIssuesByPriority(currentWeekIssues);
-	markdown += `${translations.thisWeek}, ${translations.totalIssuesFound} **${currentWeekCount}** ${translations.followingCriteria}`;
+	// Issues summary
+	const priorities = countIssuesByPriority(issuesSinceDate);
+	markdown += `${translations.since} ${formattedDate}, ${translations.totalIssuesFound} **${issueCount}** ${translations.followingCriteria}`;
 
-	// Add priority breakdown for current week
+	// Add priority breakdown
 	const priorityParts: string[] = [];
-	if (currentWeekPriorities.blocker > 0) {
-		priorityParts.push(`${currentWeekPriorities.blocker} ${translations.areBlocker}`);
+	if (priorities.blocker > 0) {
+		priorityParts.push(`${priorities.blocker} ${translations.areBlocker}`);
 	}
-	if (currentWeekPriorities.medium > 0) {
-		priorityParts.push(`${currentWeekPriorities.medium} ${translations.areMedium}`);
+	if (priorities.medium > 0) {
+		priorityParts.push(`${priorities.medium} ${translations.areMedium}`);
 	}
-	if (currentWeekPriorities.low > 0) {
-		priorityParts.push(`${currentWeekPriorities.low} ${translations.areLow}`);
+	if (priorities.low > 0) {
+		priorityParts.push(`${priorities.low} ${translations.areLow}`);
 	}
 
 	if (priorityParts.length > 0) {
-		markdown += ` (${translations.ofWhich} ${priorityParts.join(', ')})`;
+		markdown += ` (${translations.ofWhich} ${formatPriorityList(priorityParts)})`;
 	}
 
 	markdown += `\n\n`;
 
 	// Breakdown by criteria
-	const criteriaPercentages = calculateCriteriaPercentages(currentWeekIssues, language);
+	const criteriaPercentages = calculateCriteriaPercentages(issuesSinceDate, language);
 
 	// Sort by criterion number
 	const sortedEntries = Array.from(criteriaPercentages.entries()).sort((a, b) => {
@@ -182,40 +192,74 @@ export function generateWeeklyReport(
 		markdown += `- **${criterionNumber}** ${data.name} - ${data.percentage}%\n`;
 	});
 
-	// Comparison with previous week
-	if (previousWeekCount > 0) {
-		markdown += `\n`;
-		const change = calculatePercentageChange(currentWeekCount, previousWeekCount);
-		const previousWeekPriorities = countIssuesByPriority(previousWeekIssues);
-
-		if (change.direction === 'up') {
-			markdown += `${translations.comparisonPrevious} ${translations.issuesGoneUp} **+${change.percentage}%**`;
-		} else if (change.direction === 'down') {
-			markdown += `${translations.comparisonPrevious} ${translations.issuesGoneDown} **-${change.percentage}%**`;
-		} else {
-			markdown += `${translations.comparisonPrevious} ${translations.issuesStayedSame}`;
-		}
-
-		// Add priority breakdown for previous week
-		const prevPriorityParts: string[] = [];
-		if (previousWeekPriorities.blocker > 0) {
-			prevPriorityParts.push(`${previousWeekPriorities.blocker} ${translations.areBlocker}`);
-		}
-		if (previousWeekPriorities.medium > 0) {
-			prevPriorityParts.push(`${previousWeekPriorities.medium} ${translations.areMedium}`);
-		}
-		if (previousWeekPriorities.low > 0) {
-			prevPriorityParts.push(`${previousWeekPriorities.low} ${translations.areLow}`);
-		}
-
-		if (prevPriorityParts.length > 0) {
-			markdown += ` (${translations.ofWhich} ${prevPriorityParts.join(', ')} last week)`;
-		}
-
-		markdown += `.\n`;
-	} else {
-		markdown += `\n${translations.noIssuesPreviousWeek}\n`;
-	}
-
 	return markdown;
+}
+
+/**
+ * Translations needed for criteria summaries
+ */
+export interface CriteriaSummariesTranslations {
+	inThe: string;
+	pageWord: string;
+}
+
+/**
+ * Generate criteria summaries with page and issue information
+ */
+export function generateCriteriaSummaries(
+	report: Report,
+	translations: CriteriaSummariesTranslations,
+	language: Language = 'en'
+): string {
+	// Group issues by criterion number
+	const issuesByCriterion = new Map<string, Issue[]>();
+
+	report.issues.forEach(issue => {
+		const issues = issuesByCriterion.get(issue.criterionNumber) || [];
+		issues.push(issue);
+		issuesByCriterion.set(issue.criterionNumber, issues);
+	});
+
+	// Sort criterion numbers numerically
+	const sortedCriteria = Array.from(issuesByCriterion.keys()).sort((a, b) => {
+		return a.localeCompare(b, undefined, { numeric: true });
+	});
+
+	const summaries: string[] = [];
+
+	sortedCriteria.forEach(criterionNumber => {
+		const issues = issuesByCriterion.get(criterionNumber) || [];
+
+		// Get criterion name
+		const criterion = wcagCriteria.find(c => c.number === criterionNumber);
+		const criterionName = criterion ? (language === 'es' ? criterion.titleEs : criterion.title) : '';
+
+		// Add criterion header
+		let summary = `${criterionNumber} ${criterionName}\n`;
+
+		// Group issues by page
+		const issuesByPage = new Map<string, Issue[]>();
+		issues.forEach(issue => {
+			const pageIssues = issuesByPage.get(issue.page) || [];
+			pageIssues.push(issue);
+			issuesByPage.set(issue.page, pageIssues);
+		});
+
+		// Build page summaries
+		const pageSummaries: string[] = [];
+		issuesByPage.forEach((pageIssues, pageName) => {
+			// Format each issue as "title in location"
+			const issueTexts = pageIssues.map(issue => {
+				return issue.location ? `${issue.title} in ${issue.location}` : issue.title;
+			});
+			pageSummaries.push(`${translations.inThe} ${pageName} ${translations.pageWord}, ${issueTexts.join('. ')}`);
+		});
+
+		// Join all page summaries into one paragraph
+		summary += pageSummaries.join('. ') + '.';
+
+		summaries.push(summary);
+	});
+
+	return summaries.join('\n\n');
 }

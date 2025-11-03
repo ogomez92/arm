@@ -4,7 +4,7 @@
 	import type { Report, Issue } from './lib/types';
 	import { ReportStorage } from './lib/services/storage';
 	import { HTMLExport } from './lib/services/html-export';
-	import { generateWeeklyReport, type WeeklyReportTranslations } from './lib/services/weekly-report';
+	import { generateWeeklyReport, generateCriteriaSummaries, type WeeklyReportTranslations, type CriteriaSummariesTranslations } from './lib/services/weekly-report';
 	import { IndexedDBStorage, type SortBy } from './lib/services/indexdb-storage';
 	import type { AxeScanMessage } from './lib/services/axe-snippet';
 	import IssuesTable from './lib/components/IssuesTable.svelte';
@@ -32,6 +32,10 @@
 	let showAxeScanDialog = $state(false);
 	let axeScanData = $state<AxeScanMessage | null>(null);
 	let axeScanTriggerElement: HTMLElement | null = null;
+	let showWeeklyReportDialog = $state(false);
+	let weeklyReportStartDate = $state('');
+	let weeklyReportTriggerElement: HTMLElement | null = null;
+	let startDateInput: HTMLInputElement | undefined = $state();
 
 	const filteredIssues = $derived(
 		report
@@ -332,36 +336,90 @@
 		}
 	]);
 
-	async function copyWeeklyReport() {
-		if (!report) return;
+	function showWeeklyReportModal(e: Event) {
+		weeklyReportTriggerElement = e.target as HTMLElement;
+		showWeeklyReportDialog = true;
+		// Set default date to 7 days ago
+		const defaultDate = new Date();
+		defaultDate.setDate(defaultDate.getDate() - 7);
+		weeklyReportStartDate = defaultDate.toISOString().split('T')[0];
+		setTimeout(() => {
+			startDateInput?.focus();
+		}, 0);
+	}
+
+	function cancelWeeklyReport() {
+		showWeeklyReportDialog = false;
+		weeklyReportStartDate = '';
+		returnWeeklyReportFocus();
+	}
+
+	function returnWeeklyReportFocus() {
+		setTimeout(() => {
+			weeklyReportTriggerElement?.focus();
+			weeklyReportTriggerElement = null;
+		}, 0);
+	}
+
+	function handleWeeklyReportKeydown(e: KeyboardEvent) {
+		if (e.key === 'Escape') {
+			cancelWeeklyReport();
+		}
+	}
+
+	async function generateAndCopyWeeklyReport() {
+		if (!report || !weeklyReportStartDate) return;
 
 		try {
 			const translations: WeeklyReportTranslations = {
 				weeklyReport: $t('weeklyReport'),
-				thisWeek: $t('thisWeek'),
+				since: $t('since'),
 				totalIssuesFound: $t('totalIssuesFound'),
 				followingCriteria: $t('followingCriteria'),
-				comparisonPrevious: $t('comparisonPrevious'),
-				issuesGoneUp: $t('issuesGoneUp'),
-				issuesGoneDown: $t('issuesGoneDown'),
-				issuesStayedSame: $t('issuesStayedSame'),
-				noIssuesPreviousWeek: $t('noIssuesPreviousWeek'),
-				noIssuesThisWeek: $t('noIssuesThisWeek'),
+				noIssuesFound: $t('noIssuesFound'),
 				ofWhich: $t('ofWhich'),
 				areBlocker: $t('areBlocker'),
 				areMedium: $t('areMedium'),
 				areLow: $t('areLow')
 			};
 
-			const markdown = generateWeeklyReport(report, translations, $currentLanguage);
+			const startDate = new Date(weeklyReportStartDate);
+			const markdown = generateWeeklyReport(report, startDate, translations, $currentLanguage);
 			await navigator.clipboard.writeText(markdown);
+
+			showWeeklyReportDialog = false;
+			weeklyReportStartDate = '';
 
 			announcement = $t('weeklyReportCopied');
 			setTimeout(() => {
 				announcement = '';
 			}, 3000);
+
+			returnWeeklyReportFocus();
 		} catch (error) {
 			console.error('Failed to copy weekly report:', error);
+			alert($t('error') + ': ' + (error as Error).message);
+		}
+	}
+
+	async function copyCriteriaSummaries() {
+		if (!report) return;
+
+		try {
+			const translations: CriteriaSummariesTranslations = {
+				inThe: $t('inThe'),
+				pageWord: $t('pageWord')
+			};
+
+			const summaries = generateCriteriaSummaries(report, translations, $currentLanguage);
+			await navigator.clipboard.writeText(summaries);
+
+			announcement = $t('criteriaSummariesCopied');
+			setTimeout(() => {
+				announcement = '';
+			}, 3000);
+		} catch (error) {
+			console.error('Failed to copy criteria summaries:', error);
 			alert($t('error') + ': ' + (error as Error).message);
 		}
 	}
@@ -517,8 +575,21 @@
 						{$t('scanWithAxe')}
 					</button>
 					<ExportDropdown buttonLabel={$t('export')} items={exportMenuItems} />
-					<button type="button" onclick={copyWeeklyReport} class="btn-secondary">
+					<button
+						type="button"
+						onclick={(e) => showWeeklyReportModal(e)}
+						class="btn-secondary"
+						aria-haspopup="dialog"
+						aria-expanded={showWeeklyReportDialog}
+					>
 						{$t('copyWeeklyReport')}
+					</button>
+					<button
+						type="button"
+						onclick={copyCriteriaSummaries}
+						class="btn-secondary"
+					>
+						{$t('copyCriteriaSummaries')}
 					</button>
 				</div>
 			</div>
@@ -647,6 +718,47 @@
 						}
 					: undefined}
 			/>
+		</div>
+	</div>
+{/if}
+
+{#if showWeeklyReportDialog}
+	<div
+		class="modal-overlay"
+		onclick={(e) => {
+			if (e.target === e.currentTarget) cancelWeeklyReport();
+		}}
+		onkeydown={handleWeeklyReportKeydown}
+		role="dialog"
+		aria-labelledby="weekly-report-dialog-title"
+		aria-modal="true"
+		tabindex="-1"
+	>
+		<div class="modal">
+			<h2 id="weekly-report-dialog-title">{$t('selectStartDate')}</h2>
+			<form
+				onsubmit={(e) => {
+					e.preventDefault();
+					generateAndCopyWeeklyReport();
+				}}
+			>
+				<div class="form-group">
+					<label for="startDate">{$t('startDate')}:</label>
+					<input
+						type="date"
+						id="startDate"
+						bind:value={weeklyReportStartDate}
+						bind:this={startDateInput}
+						required
+					/>
+				</div>
+				<div class="modal-actions">
+					<button type="submit" class="btn-primary">{$t('generateReport')}</button>
+					<button type="button" onclick={cancelWeeklyReport} class="btn-secondary">
+						{$t('cancel')}
+					</button>
+				</div>
+			</form>
 		</div>
 	</div>
 {/if}
