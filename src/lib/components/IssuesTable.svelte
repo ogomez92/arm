@@ -14,6 +14,7 @@
 		onDelete,
 		onCopy,
 		onSortChange,
+		onCreateJiraTicket,
 		initialSortBy = 'priority'
 	}: {
 		issues: Issue[];
@@ -21,8 +22,12 @@
 		onDelete: (issueId: string) => void;
 		onCopy: () => void;
 		onSortChange?: (sortBy: SortBy) => void;
+		onCreateJiraTicket?: (issue: Issue) => void;
 		initialSortBy?: SortBy;
 	} = $props();
+
+	// Track which issue's Jira button is expanded (for aria-expanded)
+	let expandedJiraIssueId = $state<string | null>(null);
 
 	let sortBy = $state<SortBy>(initialSortBy);
 
@@ -68,6 +73,11 @@
 	function formatDate(dateString: string): string {
 		return new Date(dateString).toLocaleString($currentLanguage);
 	}
+
+	function handleJiraClick(issue: Issue) {
+		expandedJiraIssueId = issue.id;
+		onCreateJiraTicket?.(issue);
+	}
 </script>
 
 {#if issues.length === 0}
@@ -92,6 +102,7 @@
 					<th scope="col">{$t('wcagCriterion')}</th>
 					<th scope="col">{$t('issueTitle')}</th>
 					<th scope="col">{$t('issueLocation')}</th>
+					<th scope="col">{$t('jira')}</th>
 					<th scope="col">{$t('actions')}</th>
 				</tr>
 			</thead>
@@ -128,6 +139,33 @@
 							</div>
 						</td>
 						<td data-label={$t('issueLocation')}>{issue.location}</td>
+						<td data-label={$t('jira')}>
+							{#if issue.jiraTicketUrl && issue.jiraTicketKey}
+								<a
+									href={issue.jiraTicketUrl}
+									target="_blank"
+									rel="noopener noreferrer"
+									class="jira-link"
+									title={`${$t('jiraViewTicket')}: ${issue.jiraTicketKey}`}
+								>
+									{issue.jiraTicketKey}
+								</a>
+							{:else if onCreateJiraTicket}
+								<button
+									type="button"
+									onclick={() => handleJiraClick(issue)}
+									class="btn-jira"
+									aria-haspopup="dialog"
+									aria-expanded={expandedJiraIssueId === issue.id}
+									aria-label={`${$t('createJiraTicket')}: ${issue.title}`}
+									title={$t('createJiraTicket')}
+								>
+									{$t('jiraNoTicket')}
+								</button>
+							{:else}
+								<span class="no-jira">{$t('jiraNoTicket')}</span>
+							{/if}
+						</td>
 						<td data-label={$t('actions')}>
 							<div class="action-buttons">
 								<button
@@ -355,6 +393,55 @@
 	.btn-danger:focus {
 		border-color: #dc3545;
 		box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.25);
+	}
+
+	.jira-link {
+		display: inline-block;
+		padding: 0.25rem 0.5rem;
+		background-color: #0052cc;
+		color: #ffffff;
+		text-decoration: none;
+		border-radius: 4px;
+		font-size: 0.875rem;
+		font-weight: 500;
+	}
+
+	.jira-link:hover {
+		background-color: #0747a6;
+	}
+
+	.jira-link:focus {
+		outline: none;
+		box-shadow: 0 0 0 3px rgba(0, 82, 204, 0.25);
+	}
+
+	.btn-jira {
+		padding: 0.25rem 0.5rem;
+		font-size: 0.875rem;
+		font-weight: 500;
+		border: 2px dashed #ced4da;
+		border-radius: 4px;
+		background: #ffffff;
+		color: #6c757d;
+		cursor: pointer;
+		transition: all 0.2s;
+	}
+
+	.btn-jira:hover {
+		border-color: #0052cc;
+		color: #0052cc;
+		background-color: #f0f7ff;
+	}
+
+	.btn-jira:focus {
+		outline: none;
+		border-color: #0052cc;
+		box-shadow: 0 0 0 3px rgba(0, 82, 204, 0.25);
+	}
+
+	.no-jira {
+		color: #6c757d;
+		font-size: 0.875rem;
 	}
 
 	@media (max-width: 768px) {

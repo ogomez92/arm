@@ -22,6 +22,7 @@ export class HTMLExport {
 		const createdLabel = isSpanish ? 'Creado' : 'Created';
 		const updatedLabel = isSpanish ? 'Actualizado' : 'Updated';
 		const issuesLabel = isSpanish ? 'problemas encontrados' : 'issues found';
+		const jiraLabel = isSpanish ? 'Ticket de Jira' : 'Jira Ticket';
 
 		const sortIssues = (issues: Issue[]): Issue[] => {
 			const issuesCopy = [...issues];
@@ -56,6 +57,15 @@ export class HTMLExport {
 						`
 							: '';
 
+						const jiraHTML = issue.jiraTicketUrl && issue.jiraTicketKey
+							? `
+							<div class="field">
+								<strong>${jiraLabel}:</strong>
+								<a href="${this.escapeHTML(issue.jiraTicketUrl)}" target="_blank" rel="noopener noreferrer" class="jira-link">${this.escapeHTML(issue.jiraTicketKey)}</a>
+							</div>
+						`
+							: '';
+
 						return `
 						<div class="issue-item">
 							<h3>${issue.title}</h3>
@@ -77,6 +87,7 @@ export class HTMLExport {
 								<strong>${notesLabel}:</strong>
 								<p style="white-space: pre-wrap; margin: 4px 0 0 0;">${this.escapeHTML(issue.notes)}</p>
 							</div>
+							${jiraHTML}
 							<div class="field meta">
 								<small>${createdLabel}: ${new Date(issue.createdAt).toLocaleString(language)}</small>
 								<small>${updatedLabel}: ${new Date(issue.updatedAt).toLocaleString(language)}</small>
@@ -210,6 +221,21 @@ export class HTMLExport {
 		.priority-3 {
 			background-color: #f8d7da;
 			color: #721c24;
+		}
+
+		.jira-link {
+			display: inline-block;
+			padding: 0.25rem 0.5rem;
+			background-color: #0052cc;
+			color: #ffffff;
+			text-decoration: none;
+			border-radius: 4px;
+			font-size: 0.875rem;
+			font-weight: 500;
+		}
+
+		.jira-link:hover {
+			background-color: #0747a6;
 		}
 
 		@media print {

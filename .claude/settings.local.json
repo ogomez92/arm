@@ -5,7 +5,12 @@
       "Bash(npm run build:*)",
       "Bash(npm uninstall:*)",
       "Bash(npm run dev:*)",
-      "Bash(timeout /t 3)"
+      "Bash(timeout /t 3)",
+      "Bash(sudo cp:*)",
+      "Bash(sudo systemctl daemon-reload:*)",
+      "Bash(sudo systemctl restart:*)",
+      "Bash(sudo systemctl status:*)",
+      "Bash(curl:*)"
     ],
     "deny": [],
     "ask": []

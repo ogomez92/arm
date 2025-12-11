@@ -13,6 +13,9 @@
 	import ExportDropdown from './lib/components/ExportDropdown.svelte';
 	import AxeScanDialog from './lib/components/AxeScanDialog.svelte';
 	import AxeResultsPage from './lib/components/AxeResultsPage.svelte';
+	import JiraConfigModal from './lib/components/JiraConfigModal.svelte';
+	import JiraCreateModal from './lib/components/JiraCreateModal.svelte';
+	import type { JiraConfig } from './lib/types';
 
 	let report = $state<Report | null>(null);
 	let selectedPage = $state<string>('__all__');
@@ -36,6 +39,13 @@
 	let weeklyReportStartDate = $state('');
 	let weeklyReportTriggerElement: HTMLElement | null = null;
 	let startDateInput: HTMLInputElement | undefined = $state();
+
+	// Jira integration state
+	let showJiraConfigModal = $state(false);
+	let showJiraCreateModal = $state(false);
+	let jiraIssueToCreate = $state<Issue | null>(null);
+	let jiraTriggerElement: HTMLElement | null = null;
+	let pendingJiraAction = $state(false); // Whether we should open create modal after config
 
 	const filteredIssues = $derived(
 		report
@@ -481,6 +491,101 @@
 		axeScanData = data;
 		showAxeScanDialog = false;
 	}
+
+	// Jira integration handlers
+	function handleCreateJiraTicket(issue: Issue) {
+		jiraIssueToCreate = issue;
+
+		// Check if Jira is configured
+		if (!report?.jiraConfig?.baseUrl || !report?.jiraConfig?.apiToken || !report?.jiraConfig?.userEmail) {
+			// Need to configure Jira first
+			pendingJiraAction = true;
+			showJiraConfigModal = true;
+		} else {
+			// Jira is configured, show create modal
+			showJiraCreateModal = true;
+		}
+	}
+
+	function handleJiraConfigSave(config: JiraConfig) {
+		if (report) {
+			report = {
+				...report,
+				jiraConfig: config,
+				updatedAt: new Date().toISOString()
+			};
+			announcement = $t('jiraConfigSaved');
+			setTimeout(() => {
+				announcement = '';
+			}, 3000);
+		}
+
+		showJiraConfigModal = false;
+
+		// If there was a pending action, open the create modal
+		if (pendingJiraAction && jiraIssueToCreate) {
+			pendingJiraAction = false;
+			showJiraCreateModal = true;
+		}
+	}
+
+	function handleJiraConfigCancel() {
+		showJiraConfigModal = false;
+		pendingJiraAction = false;
+		jiraIssueToCreate = null;
+		returnJiraFocus();
+	}
+
+	function handleJiraCreateSuccess(ticketUrl: string, ticketKey: string) {
+		if (report && jiraIssueToCreate) {
+			// Update the issue with the Jira ticket info
+			const updatedIssues = report.issues.map((issue) =>
+				issue.id === jiraIssueToCreate!.id
+					? {
+							...issue,
+							jiraTicketUrl: ticketUrl,
+							jiraTicketKey: ticketKey,
+							updatedAt: new Date().toISOString()
+						}
+					: issue
+			);
+
+			report = {
+				...report,
+				issues: updatedIssues,
+				updatedAt: new Date().toISOString()
+			};
+
+			announcement = $t('jiraTicketCreatedWithKey').replace('{key}', ticketKey);
+			setTimeout(() => {
+				announcement = '';
+			}, 3000);
+		}
+
+		showJiraCreateModal = false;
+		jiraIssueToCreate = null;
+		returnJiraFocus();
+	}
+
+	function handleJiraCreateCancel() {
+		showJiraCreateModal = false;
+		jiraIssueToCreate = null;
+		returnJiraFocus();
+	}
+
+	function handleOpenJiraConfig() {
+		// Called from the create modal to reconfigure Jira
+		showJiraCreateModal = false;
+		pendingJiraAction = true;
+		showJiraConfigModal = true;
+	}
+
+	function returnJiraFocus() {
+		setTimeout(() => {
+			jiraTriggerElement?.focus();
+			jiraTriggerElement = null;
+		}, 0);
+	}
 </script>
 
 <Announcer bind:message={announcement} />
@@ -626,6 +731,7 @@
 					onDelete={handleDeleteIssue}
 					onCopy={handleCopySuccess}
 					onSortChange={handleSortChange}
+					onCreateJiraTicket={handleCreateJiraTicket}
 					initialSortBy={sortBy}
 				/>
 			</section>
@@ -772,6 +878,24 @@
 		scanData={axeScanData}
 		onSave={handleSaveAxeResults}
 		onCancel={handleCancelAxeResults}
+	/>
+{/if}
+
+{#if showJiraConfigModal}
+	<JiraConfigModal
+		initialConfig={report?.jiraConfig}
+		onSave={handleJiraConfigSave}
+		onCancel={handleJiraConfigCancel}
+	/>
+{/if}
+
+{#if showJiraCreateModal && jiraIssueToCreate && report?.jiraConfig}
+	<JiraCreateModal
+		issue={jiraIssueToCreate}
+		jiraConfig={report.jiraConfig}
+		onSuccess={handleJiraCreateSuccess}
+		onCancel={handleJiraCreateCancel}
+		onConfigureJira={handleOpenJiraConfig}
 	/>
 {/if}
 

@@ -21,6 +21,15 @@ export interface Issue {
 	priority: Priority;
 	createdAt: string;
 	updatedAt: string;
+	jiraTicketUrl?: string; // URL to the Jira ticket if created
+	jiraTicketKey?: string; // Jira ticket key (e.g., "PROJ-123")
+}
+
+export interface JiraConfig {
+	baseUrl: string; // e.g., "https://company.atlassian.net"
+	apiToken: string; // Jira API token
+	userEmail: string; // User email for authentication
+	projectKey?: string; // Default project key (derived from URL or set manually)
 }
 
 export interface Report {
@@ -30,6 +39,7 @@ export interface Report {
 	issues: Issue[];
 	createdAt: string;
 	updatedAt: string;
+	jiraConfig?: JiraConfig; // Jira configuration for this report
 }
 
 export type Language = 'en' | 'es';

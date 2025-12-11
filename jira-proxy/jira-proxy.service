@@ -1,0 +1,28 @@
+[Unit]
+Description=Jira CORS Proxy Server
+Documentation=https://github.com/yourusername/accessibility-reporter
+After=network.target
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/home/arm/jira-proxy
+Environment="NODE_ENV=production"
+Environment="PORT=6904"
+ExecStart=/usr/bin/node server.js
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=jira-proxy
+
+# Security settings
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+# ProtectHome=true disabled because WorkingDirectory is in /home
+ReadWritePaths=/home/arm/jira-proxy
+
+[Install]
+WantedBy=multi-user.target

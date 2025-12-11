@@ -12,6 +12,7 @@ A localized (English/Spanish) Svelte 5 application for managing accessibility re
 - 📋 **Export Options**: Download reports as JSON database or HTML
 - 🎯 **Page Filtering**: Organize issues by page and filter views
 - 📄 **Copy to Clipboard**: Copy issue details for pasting into Jira or other tools
+- 🎫 **Jira Integration**: Direct integration to create Jira tickets from accessibility issues
 
 ## Getting Started
 
@@ -126,22 +127,66 @@ Reports are stored as JSON files with the following structure:
 - **Vite**: Fast build tool
 - **WCAG 2.2**: Complete success criteria data
 
+## Jira Integration
+
+This app includes direct integration with Jira to create tickets from accessibility issues.
+
+### Setup
+
+1. **Install the Jira proxy server** (required to bypass CORS):
+   ```bash
+   cd jira-proxy
+   npm install
+   sudo cp jira-proxy.service /etc/systemd/system/
+   sudo chown -R www-data:www-data /home/arm/jira-proxy
+   sudo systemctl daemon-reload
+   sudo systemctl enable jira-proxy
+   sudo systemctl start jira-proxy
+   ```
+
+   See [jira-proxy/INSTALL.md](jira-proxy/INSTALL.md) for detailed instructions.
+
+2. **Configure Jira in the app**:
+   - Click the "Jira" button in the app
+   - Enter your Jira instance URL (e.g., `https://company.atlassian.net`)
+   - Enter your Jira email
+   - Enter your Jira API token (generate at https://id.atlassian.com/manage-profile/security/api-tokens)
+   - Optionally set a default project key
+
+3. **Create tickets**:
+   - Click the Jira icon next to any issue
+   - Review and customize the ticket details
+   - Click "Create Ticket"
+
+### Privacy Notice
+
+The Jira proxy server runs locally on your machine (localhost:6904) and forwards requests to Jira's API. **No data is collected, logged, or stored** by the proxy. All requests are forwarded directly to Jira and responses are returned immediately to your browser.
+
 ## File Structure
 
 ```
 a11y-reporter/
+├── jira-proxy/                       # Jira CORS proxy server
+│   ├── server.js                     # Express proxy server
+│   ├── package.json                  # Proxy dependencies
+│   ├── jira-proxy.service            # Systemd service file
+│   ├── INSTALL.md                    # Installation guide
+│   └── README.md                     # Proxy documentation
 ├── src/
 │   ├── lib/
 │   │   ├── components/
 │   │   │   ├── Announcer.svelte      # Screen reader announcements
 │   │   │   ├── IssueForm.svelte      # Add/Edit issue form
-│   │   │   └── IssuesTable.svelte    # Issues data table
+│   │   │   ├── IssuesTable.svelte    # Issues data table
+│   │   │   ├── JiraConfigModal.svelte # Jira configuration
+│   │   │   └── JiraCreateModal.svelte # Create Jira tickets
 │   │   ├── i18n/
 │   │   │   ├── index.ts              # i18n utilities
 │   │   │   └── translations.ts       # English/Spanish strings
 │   │   ├── services/
 │   │   │   ├── clipboard.ts          # Copy to clipboard
 │   │   │   ├── html-export.ts        # HTML report generation
+│   │   │   ├── jira.ts               # Jira API integration
 │   │   │   ├── screenshot.ts         # Image processing
 │   │   │   └── storage.ts            # Report CRUD operations
 │   │   ├── types.ts                  # TypeScript interfaces
