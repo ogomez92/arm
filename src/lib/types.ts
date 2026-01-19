@@ -19,6 +19,7 @@ export interface Issue {
 	screenshot?: string; // base64 encoded image
 	notes: string;
 	priority: Priority;
+	needsReview?: boolean;
 	createdAt: string;
 	updatedAt: string;
 	jiraTicketUrl?: string; // URL to the Jira ticket if created

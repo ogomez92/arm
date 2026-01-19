@@ -30,9 +30,15 @@
 	let expandedJiraIssueId = $state<string | null>(null);
 
 	let sortBy = $state<SortBy>(initialSortBy);
+	let showOnlyNeedsReview = $state(false);
 
 	const sortedIssues = $derived.by(() => {
-		const issuesCopy = [...issues];
+		let issuesCopy = [...issues];
+
+		// Apply needs review filter
+		if (showOnlyNeedsReview) {
+			issuesCopy = issuesCopy.filter((issue) => issue.needsReview);
+		}
 
 		switch (sortBy) {
 			case 'page':
@@ -85,13 +91,24 @@
 		<p>{$t('noIssues')}</p>
 	</div>
 {:else}
-	<div class="sort-controls">
-		<label for="sortBy">{$t('sortBy')}:</label>
-		<select id="sortBy" bind:value={sortBy} onchange={handleSortChange}>
-			<option value="priority">{$t('sortByPriority')}</option>
-			<option value="page">{$t('sortByPage')}</option>
-			<option value="criteria">{$t('sortByCriteria')}</option>
-		</select>
+	<div class="table-controls">
+		<div class="sort-controls">
+			<label for="sortBy">{$t('sortBy')}:</label>
+			<select id="sortBy" bind:value={sortBy} onchange={handleSortChange}>
+				<option value="priority">{$t('sortByPriority')}</option>
+				<option value="page">{$t('sortByPage')}</option>
+				<option value="criteria">{$t('sortByCriteria')}</option>
+			</select>
+		</div>
+		<div class="filter-controls">
+			<label class="filter-checkbox">
+				<input
+					type="checkbox"
+					bind:checked={showOnlyNeedsReview}
+				/>
+				{$t('showOnlyNeedsReview')}
+			</label>
+		</div>
 	</div>
 	<div class="table-container">
 		<table>
@@ -130,8 +147,10 @@
 							{/if}
 						</td>
 						<td data-label={$t('issueTitle')}>
-							<div class="issue-title-cell">
-								<strong>{issue.title}</strong>
+							<div class="issue-title-cell" class:needs-review={issue.needsReview}>
+								<strong
+									aria-label={issue.needsReview ? `${$t('needsReviewPrefix')} ${issue.title}` : issue.title}
+								>{issue.title}</strong>
 								<p class="description">{issue.description}</p>
 								{#if issue.screenshot}
 									<span class="has-screenshot" aria-hidden="true">📷</span>
@@ -212,11 +231,19 @@
 		font-size: 1.125rem;
 	}
 
+	.table-controls {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		flex-wrap: wrap;
+		gap: 1rem;
+		margin-bottom: 1rem;
+	}
+
 	.sort-controls {
 		display: flex;
 		align-items: center;
 		gap: 0.5rem;
-		margin-bottom: 1rem;
 	}
 
 	.sort-controls label {
@@ -237,6 +264,26 @@
 		outline: none;
 		border-color: #0066cc;
 		box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.25);
+	}
+
+	.filter-controls {
+		display: flex;
+		align-items: center;
+	}
+
+	.filter-checkbox {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		cursor: pointer;
+		font-weight: 500;
+	}
+
+	.filter-checkbox input[type='checkbox'] {
+		width: 1.125rem;
+		height: 1.125rem;
+		cursor: pointer;
+		accent-color: #0066cc;
 	}
 
 	.table-container {
@@ -339,6 +386,11 @@
 
 	.issue-title-cell {
 		position: relative;
+	}
+
+	.issue-title-cell.needs-review strong {
+		font-weight: 700;
+		text-decoration: underline;
 	}
 
 	.description {

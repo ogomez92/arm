@@ -159,7 +159,26 @@ export const translations = {
 		jiraViewTicket: 'View Ticket',
 		jiraNoTicket: 'No ticket',
 		jiraClose: 'Close',
-		jiraCancel: 'Cancel'
+		jiraCancel: 'Cancel',
+		// Merge Reports
+		mergeReports: 'Merge Reports',
+		mergeReportsTitle: 'Merge Two Reports',
+		mergeReportsDescription: 'Upload two report files to combine them into a single report. All issues and pages from both reports will be merged.',
+		firstReport: 'First Report',
+		secondReport: 'Second Report',
+		mergedReportTitle: 'Merged Report Title',
+		selectFirstReport: 'Select the first report file',
+		selectSecondReport: 'Select the second report file',
+		merge: 'Merge Reports',
+		reportsMerged: 'Reports merged successfully',
+		errorMergingReports: 'Error merging reports',
+		reportLoaded: 'Report loaded',
+		issuesCount: 'issues',
+		pagesCount: 'pages',
+		// Needs Review
+		needsReview: 'Needs further review',
+		showOnlyNeedsReview: 'Show only issues needing review',
+		needsReviewPrefix: 'Needs review:'
 	},
 	es: {
 		appTitle: 'Gestor de Informes de Accesibilidad',
@@ -321,7 +340,26 @@ export const translations = {
 		jiraViewTicket: 'Ver Ticket',
 		jiraNoTicket: 'Sin ticket',
 		jiraClose: 'Cerrar',
-		jiraCancel: 'Cancelar'
+		jiraCancel: 'Cancelar',
+		// Merge Reports
+		mergeReports: 'Combinar Informes',
+		mergeReportsTitle: 'Combinar Dos Informes',
+		mergeReportsDescription: 'Sube dos archivos de informe para combinarlos en un solo informe. Todos los problemas y páginas de ambos informes serán combinados.',
+		firstReport: 'Primer Informe',
+		secondReport: 'Segundo Informe',
+		mergedReportTitle: 'Título del Informe Combinado',
+		selectFirstReport: 'Selecciona el primer archivo de informe',
+		selectSecondReport: 'Selecciona el segundo archivo de informe',
+		merge: 'Combinar Informes',
+		reportsMerged: 'Informes combinados exitosamente',
+		errorMergingReports: 'Error al combinar informes',
+		reportLoaded: 'Informe cargado',
+		issuesCount: 'problemas',
+		pagesCount: 'páginas',
+		// Needs Review
+		needsReview: 'Requiere revisión adicional',
+		showOnlyNeedsReview: 'Mostrar solo problemas que requieren revisión',
+		needsReviewPrefix: 'Requiere revisión:'
 	}
 };
 

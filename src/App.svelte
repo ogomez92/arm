@@ -15,6 +15,7 @@
 	import AxeResultsPage from './lib/components/AxeResultsPage.svelte';
 	import JiraConfigModal from './lib/components/JiraConfigModal.svelte';
 	import JiraCreateModal from './lib/components/JiraCreateModal.svelte';
+	import MergeReportsModal from './lib/components/MergeReportsModal.svelte';
 	import type { JiraConfig } from './lib/types';
 
 	let report = $state<Report | null>(null);
@@ -46,6 +47,10 @@
 	let jiraIssueToCreate = $state<Issue | null>(null);
 	let jiraTriggerElement: HTMLElement | null = null;
 	let pendingJiraAction = $state(false); // Whether we should open create modal after config
+
+	// Merge reports state
+	let showMergeReportsModal = $state(false);
+	let mergeReportsTriggerElement: HTMLElement | null = null;
 
 	const filteredIssues = $derived(
 		report
@@ -586,6 +591,37 @@
 			jiraTriggerElement = null;
 		}, 0);
 	}
+
+	// Merge reports handlers
+	function handleOpenMergeReports(e: Event) {
+		mergeReportsTriggerElement = e.target as HTMLElement;
+		showMergeReportsModal = true;
+	}
+
+	function handleMergeReportsComplete(mergedReport: Report) {
+		report = mergedReport;
+		selectedPage = '__all__';
+		showMergeReportsModal = false;
+
+		announcement = $t('reportsMerged');
+		setTimeout(() => {
+			announcement = '';
+		}, 3000);
+
+		returnMergeReportsFocus();
+	}
+
+	function handleMergeReportsCancel() {
+		showMergeReportsModal = false;
+		returnMergeReportsFocus();
+	}
+
+	function returnMergeReportsFocus() {
+		setTimeout(() => {
+			mergeReportsTriggerElement?.focus();
+			mergeReportsTriggerElement = null;
+		}, 0);
+	}
 </script>
 
 <Announcer bind:message={announcement} />
@@ -627,6 +663,15 @@
 						aria-expanded={showAxeScanDialog}
 					>
 						{$t('scanWithAxe')}
+					</button>
+					<button
+						type="button"
+						onclick={(e) => handleOpenMergeReports(e)}
+						class="btn-secondary"
+						aria-haspopup="dialog"
+						aria-expanded={showMergeReportsModal}
+					>
+						{$t('mergeReports')}
 					</button>
 				</div>
 
@@ -678,6 +723,15 @@
 						aria-expanded={showAxeScanDialog}
 					>
 						{$t('scanWithAxe')}
+					</button>
+					<button
+						type="button"
+						onclick={(e) => handleOpenMergeReports(e)}
+						class="btn-secondary"
+						aria-haspopup="dialog"
+						aria-expanded={showMergeReportsModal}
+					>
+						{$t('mergeReports')}
 					</button>
 					<ExportDropdown buttonLabel={$t('export')} items={exportMenuItems} />
 					<button
@@ -896,6 +950,13 @@
 		onSuccess={handleJiraCreateSuccess}
 		onCancel={handleJiraCreateCancel}
 		onConfigureJira={handleOpenJiraConfig}
+	/>
+{/if}
+
+{#if showMergeReportsModal}
+	<MergeReportsModal
+		onMerge={handleMergeReportsComplete}
+		onCancel={handleMergeReportsCancel}
 	/>
 {/if}
 
@@ -1161,48 +1222,57 @@
 		left: 0;
 		right: 0;
 		bottom: 0;
-		background-color: rgba(0, 0, 0, 0.5);
+		background-color: rgba(0, 0, 0, 0.6);
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		padding: 1rem;
 		z-index: 1000;
+		overflow-y: auto;
 	}
 
 	.modal {
 		background: #ffffff;
 		padding: 2rem;
-		border-radius: 8px;
+		border-radius: 12px;
 		max-width: 500px;
 		width: 100%;
-		box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+		max-height: calc(100vh - 2rem);
+		overflow-y: auto;
+		box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15), 0 2px 8px rgba(0, 0, 0, 0.1);
+		margin: auto;
 	}
 
 	.modal-large {
 		max-width: 800px;
+		max-height: calc(100vh - 2rem);
 	}
 
 	.modal h2 {
 		margin: 0 0 1.5rem 0;
 		font-size: 1.5rem;
+		color: #1a1a1a;
 	}
 
 	.form-group {
-		margin-bottom: 1.25rem;
+		margin-bottom: 1.5rem;
 	}
 
 	.form-group label {
 		display: block;
 		font-weight: 600;
 		margin-bottom: 0.5rem;
+		color: #212529;
 	}
 
 	.form-group input {
 		width: 100%;
-		padding: 0.5rem 0.75rem;
+		padding: 0.75rem 1rem;
 		font-size: 1rem;
 		border: 2px solid #ced4da;
-		border-radius: 4px;
+		border-radius: 6px;
+		transition: border-color 0.2s, box-shadow 0.2s;
+		box-sizing: border-box;
 	}
 
 	.form-group input:focus {
@@ -1211,10 +1281,16 @@
 		box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.25);
 	}
 
+	.form-group input:hover:not(:focus) {
+		border-color: #adb5bd;
+	}
+
 	.modal-actions {
 		display: flex;
 		gap: 1rem;
-		margin-top: 1.5rem;
+		margin-top: 2rem;
+		padding-top: 1.5rem;
+		border-top: 1px solid #e9ecef;
 	}
 
 	.sr-only {
@@ -1259,6 +1335,46 @@
 
 		.report-actions button {
 			width: 100%;
+		}
+
+		.modal {
+			padding: 1.5rem;
+			margin: 0.5rem;
+			max-height: calc(100vh - 1rem);
+		}
+
+		.modal-large {
+			max-height: calc(100vh - 1rem);
+		}
+	}
+
+	/* Dark mode support for modals */
+	@media (prefers-color-scheme: dark) {
+		.modal {
+			background: #2d2d2d;
+			color: #e9ecef;
+		}
+
+		.modal h2 {
+			color: #e9ecef;
+		}
+
+		.form-group label {
+			color: #e9ecef;
+		}
+
+		.form-group input {
+			background-color: #1a1a1a;
+			color: #e9ecef;
+			border-color: #495057;
+		}
+
+		.form-group input:hover:not(:focus) {
+			border-color: #6c757d;
+		}
+
+		.modal-actions {
+			border-top-color: #495057;
 		}
 	}
 </style>

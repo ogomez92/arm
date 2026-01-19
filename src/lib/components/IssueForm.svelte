@@ -16,6 +16,7 @@
 		screenshot?: string;
 		notes: string;
 		priority: Priority;
+		needsReview?: boolean;
 	}
 
 	let {
@@ -38,7 +39,8 @@
 		location: initialData?.location || '',
 		screenshot: initialData?.screenshot,
 		notes: initialData?.notes || '',
-		priority: initialData?.priority || 2
+		priority: initialData?.priority || 2,
+		needsReview: initialData?.needsReview || false
 	});
 
 	let showNewPageField = $state(false);
@@ -105,7 +107,6 @@
 		if (!formData.criterionNumber) errors.criterionNumber = $t('required');
 		if (!formData.title) errors.title = $t('required');
 		if (!formData.description) errors.description = $t('required');
-		if (!formData.location) errors.location = $t('required');
 		if (!formData.notes) errors.notes = $t('required');
 		if (!formData.priority) errors.priority = $t('required');
 
@@ -240,19 +241,13 @@
 
 	<div class="form-group">
 		<label for="location">
-			{$t('issueLocation')} <span class="required-indicator">({$t('required')})</span>
+			{$t('issueLocation')} <span class="optional-indicator">({$t('optional')})</span>
 		</label>
 		<textarea
 			id="location"
 			bind:value={formData.location}
 			rows="3"
-			aria-required="true"
-			aria-invalid={!!errors.location}
-			aria-describedby={errors.location ? 'location-error' : undefined}
 		></textarea>
-		{#if errors.location}
-			<div id="location-error" class="error" role="alert">{errors.location}</div>
-		{/if}
 	</div>
 
 	<div class="form-group">
@@ -298,6 +293,16 @@
 		{/if}
 	</div>
 
+	<div class="form-group checkbox-group">
+		<label class="checkbox-label">
+			<input
+				type="checkbox"
+				bind:checked={formData.needsReview}
+			/>
+			{$t('needsReview')}
+		</label>
+	</div>
+
 	<div class="form-actions">
 		<button type="submit" class="btn-primary">{$t('save')}</button>
 		<button type="button" onclick={onCancel} class="btn-secondary">{$t('cancel')}</button>
@@ -307,13 +312,13 @@
 <style>
 	.issue-form {
 		background: #ffffff;
-		padding: 1.5rem;
-		border-radius: 8px;
-		border: 1px solid #dee2e6;
+		padding: 0;
+		border-radius: 0;
+		border: none;
 	}
 
 	.form-group {
-		margin-bottom: 1.25rem;
+		margin-bottom: 1.5rem;
 	}
 
 	label {
@@ -339,14 +344,16 @@
 	select,
 	textarea {
 		width: 100%;
-		padding: 0.5rem 0.75rem;
+		padding: 0.75rem 1rem;
 		font-size: 1rem;
 		line-height: 1.5;
 		color: #212529;
 		background-color: #fff;
 		border: 2px solid #ced4da;
-		border-radius: 4px;
+		border-radius: 6px;
 		font-family: inherit;
+		transition: border-color 0.2s, box-shadow 0.2s;
+		box-sizing: border-box;
 	}
 
 	input[type='text']:focus,
@@ -357,58 +364,93 @@
 		box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.25);
 	}
 
+	input[type='text']:hover:not(:focus),
+	select:hover:not(:focus),
+	textarea:hover:not(:focus) {
+		border-color: #adb5bd;
+	}
+
 	input[type='file'] {
-		padding: 0.5rem 0;
+		padding: 0.75rem 0;
+		font-size: 0.9rem;
 	}
 
 	textarea {
 		resize: vertical;
+		min-height: 80px;
 	}
 
 	.error {
 		color: #dc3545;
 		font-size: 0.875rem;
-		margin-top: 0.25rem;
+		margin-top: 0.5rem;
+		display: flex;
+		align-items: center;
+		gap: 0.25rem;
+	}
+
+	.error::before {
+		content: '';
 	}
 
 	.help-text {
 		color: #6c757d;
 		font-size: 0.875rem;
-		margin-top: 0.25rem;
+		margin-top: 0.5rem;
 	}
 
 	.screenshot-preview {
 		margin-top: 1rem;
-		padding: 1rem;
+		padding: 1.25rem;
 		background: #f8f9fa;
-		border: 1px solid #dee2e6;
-		border-radius: 4px;
+		border: 2px solid #e9ecef;
+		border-radius: 8px;
 	}
 
 	.screenshot-preview img {
 		max-width: 100%;
 		height: auto;
 		display: block;
-		margin-bottom: 0.75rem;
+		margin-bottom: 1rem;
 		border: 1px solid #dee2e6;
-		border-radius: 4px;
+		border-radius: 6px;
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+	}
+
+	.checkbox-group {
+		margin-top: 1rem;
+	}
+
+	.checkbox-label {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		cursor: pointer;
+		font-weight: 500;
+	}
+
+	.checkbox-label input[type='checkbox'] {
+		width: 1.25rem;
+		height: 1.25rem;
+		cursor: pointer;
+		accent-color: #0066cc;
 	}
 
 	.form-actions {
 		display: flex;
 		gap: 1rem;
-		margin-top: 1.5rem;
+		margin-top: 2rem;
 		padding-top: 1.5rem;
-		border-top: 1px solid #dee2e6;
+		border-top: 1px solid #e9ecef;
 	}
 
 	.btn-primary,
 	.btn-secondary {
-		padding: 0.625rem 1.25rem;
+		padding: 0.75rem 1.5rem;
 		font-size: 1rem;
 		font-weight: 500;
 		border: none;
-		border-radius: 4px;
+		border-radius: 6px;
 		cursor: pointer;
 		transition: all 0.2s;
 	}
@@ -420,6 +462,8 @@
 
 	.btn-primary:hover {
 		background-color: #0052a3;
+		transform: translateY(-1px);
+		box-shadow: 0 2px 4px rgba(0, 102, 204, 0.3);
 	}
 
 	.btn-primary:focus {
@@ -434,6 +478,8 @@
 
 	.btn-secondary:hover {
 		background-color: #5a6268;
+		transform: translateY(-1px);
+		box-shadow: 0 2px 4px rgba(108, 117, 125, 0.3);
 	}
 
 	.btn-secondary:focus {
@@ -445,5 +491,40 @@
 	select[aria-invalid='true'],
 	textarea[aria-invalid='true'] {
 		border-color: #dc3545;
+	}
+
+	input[aria-invalid='true']:focus,
+	select[aria-invalid='true']:focus,
+	textarea[aria-invalid='true']:focus {
+		box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.25);
+	}
+
+	@media (prefers-color-scheme: dark) {
+		.issue-form {
+			background: transparent;
+		}
+
+		label {
+			color: #e9ecef;
+		}
+
+		input[type='text'],
+		select,
+		textarea {
+			background-color: #1a1a1a;
+			color: #e9ecef;
+			border-color: #495057;
+		}
+
+		input[type='text']:hover:not(:focus),
+		select:hover:not(:focus),
+		textarea:hover:not(:focus) {
+			border-color: #6c757d;
+		}
+
+		.screenshot-preview {
+			background: #1a1a1a;
+			border-color: #495057;
+		}
 	}
 </style>

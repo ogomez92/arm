@@ -1,4 +1,4 @@
-import type { Report, Issue } from '../types';
+import type { Report, Issue, JiraConfig } from '../types';
 
 export class ReportStorage {
 	static createNewReport(name: string): Report {
@@ -114,6 +114,75 @@ export class ReportStorage {
 			pages,
 			issues,
 			updatedAt: now
+		};
+	}
+
+	/**
+	 * Merges two reports into one, preserving all data from both.
+	 * Uses a Set-based approach to avoid duplicates while keeping all unique entries.
+	 * Issues are merged by comparing their IDs - if an issue exists in both reports,
+	 * the one with the more recent updatedAt timestamp is kept.
+	 */
+	static mergeReports(report1: Report, report2: Report, newTitle: string): Report {
+		const now = new Date().toISOString();
+
+		// Create a map of issues by ID to handle potential duplicates intelligently
+		const issueMap = new Map<string, Issue>();
+
+		// Add all issues from report1
+		for (const issue of report1.issues) {
+			issueMap.set(issue.id, issue);
+		}
+
+		// Add issues from report2, keeping the more recent version if duplicate ID exists
+		for (const issue of report2.issues) {
+			const existing = issueMap.get(issue.id);
+			if (!existing) {
+				issueMap.set(issue.id, issue);
+			} else {
+				// Keep the more recently updated version
+				const existingDate = new Date(existing.updatedAt).getTime();
+				const newDate = new Date(issue.updatedAt).getTime();
+				if (newDate > existingDate) {
+					issueMap.set(issue.id, issue);
+				}
+			}
+		}
+
+		// Merge all issues
+		const mergedIssues = Array.from(issueMap.values());
+
+		// Merge pages - use a Set to avoid duplicates
+		const allPages = new Set<string>([...report1.pages, ...report2.pages]);
+
+		// Also include any pages referenced by issues that might not be in the pages array
+		for (const issue of mergedIssues) {
+			allPages.add(issue.page);
+		}
+
+		// Merge jiraConfig - use whichever report has a complete config
+		// A complete config has baseUrl, apiToken, and userEmail
+		const isCompleteConfig = (config?: JiraConfig) =>
+			config?.baseUrl && config?.apiToken && config?.userEmail;
+
+		let jiraConfig: JiraConfig | undefined;
+		if (isCompleteConfig(report1.jiraConfig)) {
+			jiraConfig = report1.jiraConfig;
+		} else if (isCompleteConfig(report2.jiraConfig)) {
+			jiraConfig = report2.jiraConfig;
+		} else {
+			// Fall back to partial config if available
+			jiraConfig = report1.jiraConfig || report2.jiraConfig;
+		}
+
+		return {
+			id: crypto.randomUUID(),
+			name: newTitle,
+			pages: Array.from(allPages),
+			issues: mergedIssues,
+			createdAt: now,
+			updatedAt: now,
+			jiraConfig
 		};
 	}
 }
