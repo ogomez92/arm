@@ -79,15 +79,6 @@
 		onClose();
 	}
 
-	function clearFilters() {
-		localFilters = {
-			needsReview: false,
-			priorities: [],
-			principles: [],
-			pages: []
-		};
-	}
-
 	function clearAllAndApply() {
 		filters = {
 			needsReview: false,
@@ -194,9 +185,6 @@
 		<div class="modal-actions">
 			<button type="button" onclick={applyFilters} class="btn-primary">
 				{$t('applyFilters')}
-			</button>
-			<button type="button" onclick={clearFilters} class="btn-secondary">
-				{$t('clearFilters')}
 			</button>
 			<button type="button" onclick={clearAllAndApply} class="btn-danger">
 				{$t('removeAllFilters')}
