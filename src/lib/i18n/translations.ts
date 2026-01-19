@@ -183,7 +183,19 @@ export const translations = {
 		// Searchable select
 		searchCriteria: 'Search criteria...',
 		noResultsFound: 'No results found',
-		resultsCount: '{count} results'
+		resultsCount: '{count} results',
+		// Filters modal
+		filters: 'Filters',
+		filterByPriority: 'Filter by priority',
+		filterByPrinciple: 'Filter by principle',
+		principlePerceivable: 'Perceivable',
+		principleOperable: 'Operable',
+		principleUnderstandable: 'Understandable',
+		principleRobust: 'Robust',
+		applyFilters: 'Apply Filters',
+		clearFilters: 'Clear Filters',
+		removeAllFilters: 'Remove All Filters',
+		activeFilters: '{count} active'
 	},
 	es: {
 		appTitle: 'Gestor de Informes de Accesibilidad',
@@ -369,7 +381,19 @@ export const translations = {
 		// Searchable select
 		searchCriteria: 'Buscar criterio...',
 		noResultsFound: 'No se encontraron resultados',
-		resultsCount: '{count} resultados'
+		resultsCount: '{count} resultados',
+		// Filters modal
+		filters: 'Filtros',
+		filterByPriority: 'Filtrar por prioridad',
+		filterByPrinciple: 'Filtrar por principio',
+		principlePerceivable: 'Perceptible',
+		principleOperable: 'Operable',
+		principleUnderstandable: 'Comprensible',
+		principleRobust: 'Robusto',
+		applyFilters: 'Aplicar Filtros',
+		clearFilters: 'Limpiar Filtros',
+		removeAllFilters: 'Quitar Todos los Filtros',
+		activeFilters: '{count} activos'
 	}
 };
 

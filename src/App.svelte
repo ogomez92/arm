@@ -16,10 +16,10 @@
 	import JiraConfigModal from './lib/components/JiraConfigModal.svelte';
 	import JiraCreateModal from './lib/components/JiraCreateModal.svelte';
 	import MergeReportsModal from './lib/components/MergeReportsModal.svelte';
+	import FiltersModal, { type FilterState } from './lib/components/FiltersModal.svelte';
 	import type { JiraConfig } from './lib/types';
 
 	let report = $state<Report | null>(null);
-	let selectedPage = $state<string>('__all__');
 	let showAddForm = $state(false);
 	let editingIssue = $state<Issue | null>(null);
 	let duplicatingIssueData = $state<{
@@ -62,13 +62,56 @@
 	let showMergeReportsModal = $state(false);
 	let mergeReportsTriggerElement: HTMLElement | null = null;
 
-	const filteredIssues = $derived(
-		report
-			? selectedPage === '__all__'
-				? [...report.issues]
-				: report.issues.filter((issue) => issue.page === selectedPage)
-			: []
-	);
+	// Filters modal state
+	let showFiltersModal = $state(false);
+	let filtersTriggerElement: HTMLElement | null = null;
+	let filters = $state<FilterState>({
+		needsReview: false,
+		priorities: [],
+		principles: [],
+		pages: []
+	});
+
+	// Count active filters
+	const activeFilterCount = $derived.by(() => {
+		let count = 0;
+		if (filters.needsReview) count++;
+		count += filters.priorities.length;
+		count += filters.principles.length;
+		count += filters.pages.length;
+		return count;
+	});
+
+	const filteredIssues = $derived.by(() => {
+		if (!report) return [];
+
+		let issues = [...report.issues];
+
+		// Apply needs review filter
+		if (filters.needsReview) {
+			issues = issues.filter((issue) => issue.needsReview);
+		}
+
+		// Apply priority filter
+		if (filters.priorities.length > 0) {
+			issues = issues.filter((issue) => filters.priorities.includes(issue.priority));
+		}
+
+		// Apply principle filter (based on first digit of criterion number)
+		if (filters.principles.length > 0) {
+			issues = issues.filter((issue) => {
+				const principle = issue.criterionNumber.charAt(0);
+				return filters.principles.includes(principle);
+			});
+		}
+
+		// Apply page filter
+		if (filters.pages.length > 0) {
+			issues = issues.filter((issue) => filters.pages.includes(issue.page));
+		}
+
+		return issues;
+	});
 
 	// Load saved report from IndexedDB on mount and migrate from localStorage if needed
 	onMount(async () => {
@@ -160,7 +203,7 @@
 
 	// Announce filtered issues count
 	$effect(() => {
-		if (report && selectedPage !== undefined) {
+		if (report) {
 			const count = filteredIssues.length;
 
 			// Only announce if count changed
@@ -191,7 +234,6 @@
 			try {
 				const loadedReport = await ReportStorage.loadReportFromFile(file);
 				report = loadedReport;
-				selectedPage = '__all__';
 				showAddForm = false;
 				editingIssue = null;
 
@@ -223,7 +265,6 @@
 			report = ReportStorage.createNewReport(newReportName.trim());
 			showCreateDialog = false;
 			newReportName = '';
-			selectedPage = '__all__';
 			showAddForm = false;
 			editingIssue = null;
 
@@ -631,7 +672,6 @@
 
 	function handleMergeReportsComplete(mergedReport: Report) {
 		report = mergedReport;
-		selectedPage = '__all__';
 		showMergeReportsModal = false;
 
 		announcement = $t('reportsMerged');
@@ -651,6 +691,24 @@
 		setTimeout(() => {
 			mergeReportsTriggerElement?.focus();
 			mergeReportsTriggerElement = null;
+		}, 0);
+	}
+
+	// Filters modal handlers
+	function handleOpenFilters(e: Event) {
+		filtersTriggerElement = e.target as HTMLElement;
+		showFiltersModal = true;
+	}
+
+	function handleCloseFilters() {
+		showFiltersModal = false;
+		returnFiltersFocus();
+	}
+
+	function returnFiltersFocus() {
+		setTimeout(() => {
+			filtersTriggerElement?.focus();
+			filtersTriggerElement = null;
 		}, 0);
 	}
 </script>
@@ -785,15 +843,18 @@
 			</div>
 
 			<div class="controls">
-				<div class="filter-controls">
-					<label for="pageFilter">{$t('filterByPage')}:</label>
-					<select id="pageFilter" bind:value={selectedPage}>
-						<option value="__all__">{$t('allPages')}</option>
-						{#each report.pages as page}
-							<option value={page}>{page}</option>
-						{/each}
-					</select>
-				</div>
+				<button
+					type="button"
+					onclick={(e) => handleOpenFilters(e)}
+					class="btn-secondary"
+					aria-haspopup="dialog"
+					aria-expanded={showFiltersModal}
+				>
+					{$t('filters')}
+					{#if activeFilterCount > 0}
+						<span class="filter-badge">({$t('activeFilters').replace('{count}', activeFilterCount.toString())})</span>
+					{/if}
+				</button>
 
 			<button
 				type="button"
@@ -1002,6 +1063,14 @@
 	/>
 {/if}
 
+{#if showFiltersModal && report}
+	<FiltersModal
+		availablePages={report.pages}
+		bind:filters
+		onClose={handleCloseFilters}
+	/>
+{/if}
+
 <style>
 	:global(body) {
 		margin: 0;
@@ -1183,30 +1252,6 @@
 		flex-wrap: wrap;
 	}
 
-	.filter-controls {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-	}
-
-	.filter-controls label {
-		font-weight: 500;
-	}
-
-	.filter-controls select {
-		padding: 0.5rem 0.75rem;
-		border: 2px solid #ced4da;
-		border-radius: 4px;
-		font-size: 1rem;
-		min-width: 200px;
-	}
-
-	.filter-controls select:focus {
-		outline: none;
-		border-color: #0066cc;
-		box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.25);
-	}
-
 	.issues-section {
 		margin-bottom: 2rem;
 	}
@@ -1256,6 +1301,11 @@
 	.btn-secondary:focus {
 		outline: none;
 		box-shadow: 0 0 0 3px rgba(108, 117, 125, 0.5);
+	}
+
+	.filter-badge {
+		font-size: 0.875rem;
+		margin-left: 0.25rem;
 	}
 
 	.modal-overlay {
@@ -1360,15 +1410,6 @@
 		.controls {
 			flex-direction: column;
 			align-items: stretch;
-		}
-
-		.filter-controls {
-			flex-direction: column;
-			align-items: stretch;
-		}
-
-		.filter-controls select {
-			width: 100%;
 		}
 
 		.report-actions {

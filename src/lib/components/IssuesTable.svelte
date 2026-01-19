@@ -32,15 +32,9 @@
 	let expandedJiraIssueId = $state<string | null>(null);
 
 	let sortBy = $state<SortBy>(initialSortBy);
-	let showOnlyNeedsReview = $state(false);
 
 	const sortedIssues = $derived.by(() => {
-		let issuesCopy = [...issues];
-
-		// Apply needs review filter
-		if (showOnlyNeedsReview) {
-			issuesCopy = issuesCopy.filter((issue) => issue.needsReview);
-		}
+		const issuesCopy = [...issues];
 
 		switch (sortBy) {
 			case 'page':
@@ -101,15 +95,6 @@
 				<option value="page">{$t('sortByPage')}</option>
 				<option value="criteria">{$t('sortByCriteria')}</option>
 			</select>
-		</div>
-		<div class="filter-controls">
-			<label class="filter-checkbox">
-				<input
-					type="checkbox"
-					bind:checked={showOnlyNeedsReview}
-				/>
-				{$t('showOnlyNeedsReview')}
-			</label>
 		</div>
 	</div>
 	<div class="table-container">
@@ -275,26 +260,6 @@
 		outline: none;
 		border-color: #0066cc;
 		box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.25);
-	}
-
-	.filter-controls {
-		display: flex;
-		align-items: center;
-	}
-
-	.filter-checkbox {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-		cursor: pointer;
-		font-weight: 500;
-	}
-
-	.filter-checkbox input[type='checkbox'] {
-		width: 1.125rem;
-		height: 1.125rem;
-		cursor: pointer;
-		accent-color: #0066cc;
 	}
 
 	.table-container {
