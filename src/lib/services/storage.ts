@@ -1,5 +1,16 @@
 import type { Report, Issue, JiraConfig } from '../types';
 
+export function formatDateTimeForFilename(): string {
+	const now = new Date();
+	const year = now.getFullYear();
+	const month = String(now.getMonth() + 1).padStart(2, '0');
+	const day = String(now.getDate()).padStart(2, '0');
+	const hours = String(now.getHours()).padStart(2, '0');
+	const minutes = String(now.getMinutes()).padStart(2, '0');
+	const seconds = String(now.getSeconds()).padStart(2, '0');
+	return `${year}${month}${day}-${hours}${minutes}${seconds}`;
+}
+
 export class ReportStorage {
 	static createNewReport(name: string): Report {
 		const now = new Date().toISOString();
@@ -52,7 +63,8 @@ export class ReportStorage {
 		const url = URL.createObjectURL(dataBlob);
 		const link = document.createElement('a');
 		link.href = url;
-		link.download = `${report.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_report.json`;
+		const dateTime = formatDateTimeForFilename();
+		link.download = `${report.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_${dateTime}.json`;
 		document.body.appendChild(link);
 		link.click();
 		document.body.removeChild(link);

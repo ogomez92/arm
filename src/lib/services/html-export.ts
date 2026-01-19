@@ -2,6 +2,7 @@ import type { Report, Issue } from '../types';
 import { wcagCriteria } from '../wcag-criteria';
 import { getPriorityLabel } from '../utils/priority';
 import { getWCAGCriterionTitle } from '../utils/wcag';
+import { formatDateTimeForFilename } from './storage';
 
 type SortBy = 'page' | 'criteria' | 'priority';
 
@@ -278,7 +279,8 @@ export class HTMLExport {
 		const url = URL.createObjectURL(blob);
 		const link = document.createElement('a');
 		link.href = url;
-		link.download = `${report.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_report.html`;
+		const dateTime = formatDateTimeForFilename();
+		link.download = `${report.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_${dateTime}.html`;
 		document.body.appendChild(link);
 		link.click();
 		document.body.removeChild(link);

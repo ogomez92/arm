@@ -6,6 +6,7 @@
 	import type { Priority } from '../types';
 	import { formatWCAGOption } from '../utils/wcag';
 	import Announcer from './Announcer.svelte';
+	import SearchableSelect from './SearchableSelect.svelte';
 
 	interface IssueFormData {
 		page: string;
@@ -57,7 +58,8 @@
 	const wcagOptions = $derived(
 		wcagCriteria.map((c) => ({
 			value: c.number,
-			label: formatWCAGOption(c, $currentLanguage)
+			label: formatWCAGOption(c, $currentLanguage),
+			searchText: c.number.replace(/\./g, '') // e.g., "1.1.1" -> "111" for searching
 		}))
 	);
 
@@ -167,18 +169,15 @@
 		<label for="criterion">
 			{$t('wcagCriterion')} <span class="required-indicator">({$t('required')})</span>
 		</label>
-		<select
+		<SearchableSelect
 			id="criterion"
+			options={wcagOptions}
 			bind:value={formData.criterionNumber}
-			aria-required="true"
-			aria-invalid={!!errors.criterionNumber}
-			aria-describedby={errors.criterionNumber ? 'criterion-error' : undefined}
-		>
-			<option value="">{$t('selectCriterion')}</option>
-			{#each wcagOptions as option}
-				<option value={option.value}>{option.label}</option>
-			{/each}
-		</select>
+			placeholder={$t('searchCriteria')}
+			required={true}
+			hasError={!!errors.criterionNumber}
+			errorId={errors.criterionNumber ? 'criterion-error' : undefined}
+		/>
 		{#if errors.criterionNumber}
 			<div id="criterion-error" class="error" role="alert">{errors.criterionNumber}</div>
 		{/if}

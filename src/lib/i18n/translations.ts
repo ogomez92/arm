@@ -179,7 +179,11 @@ export const translations = {
 		// Needs Review
 		needsReview: 'Needs further review',
 		showOnlyNeedsReview: 'Show only issues needing review',
-		needsReviewPrefix: 'Needs review:'
+		needsReviewPrefix: 'Needs review:',
+		// Searchable select
+		searchCriteria: 'Search criteria...',
+		noResultsFound: 'No results found',
+		resultsCount: '{count} results'
 	},
 	es: {
 		appTitle: 'Gestor de Informes de Accesibilidad',
@@ -361,7 +365,11 @@ export const translations = {
 		// Needs Review
 		needsReview: 'Requiere revisión adicional',
 		showOnlyNeedsReview: 'Mostrar solo problemas que requieren revisión',
-		needsReviewPrefix: 'Requiere revisión:'
+		needsReviewPrefix: 'Requiere revisión:',
+		// Searchable select
+		searchCriteria: 'Buscar criterio...',
+		noResultsFound: 'No se encontraron resultados',
+		resultsCount: '{count} resultados'
 	}
 };
 
