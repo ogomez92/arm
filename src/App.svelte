@@ -22,6 +22,16 @@
 	let selectedPage = $state<string>('__all__');
 	let showAddForm = $state(false);
 	let editingIssue = $state<Issue | null>(null);
+	let duplicatingIssueData = $state<{
+		page: string;
+		criterionNumber: string;
+		title: string;
+		description: string;
+		location: string;
+		notes: string;
+		priority: number;
+		needsReview?: boolean;
+	} | null>(null);
 	let fileInput: HTMLInputElement | undefined = $state();
 	let reportNameInput: HTMLInputElement | undefined = $state();
 	let addIssueButton: HTMLButtonElement | undefined = $state();
@@ -257,6 +267,25 @@
 		showAddForm = true;
 	}
 
+	function handleDuplicateIssue(issue: Issue, e?: Event) {
+		if (e) {
+			issueFormTriggerElement = e.target as HTMLElement;
+		}
+		// Set duplicating data excluding screenshot (will create new issue with new ID)
+		duplicatingIssueData = {
+			page: issue.page,
+			criterionNumber: issue.criterionNumber,
+			title: issue.title,
+			description: issue.description,
+			location: issue.location,
+			notes: issue.notes,
+			priority: issue.priority,
+			needsReview: issue.needsReview
+		};
+		editingIssue = null;
+		showAddForm = true;
+	}
+
 	function handleSubmitIssue(data: {
 		page: string;
 		criterionNumber: string;
@@ -277,6 +306,7 @@
 			}
 			showAddForm = false;
 			editingIssue = null;
+			duplicatingIssueData = null;
 			returnIssueFormFocus();
 		} catch (error) {
 			alert($t('errorSavingIssue') + ': ' + (error as Error).message);
@@ -286,6 +316,7 @@
 	function handleCancelForm() {
 		showAddForm = false;
 		editingIssue = null;
+		duplicatingIssueData = null;
 		returnIssueFormFocus();
 	}
 
@@ -784,6 +815,7 @@
 					onEdit={handleEditIssue}
 					onDelete={handleDeleteIssue}
 					onCopy={handleCopySuccess}
+					onDuplicate={handleDuplicateIssue}
 					onSortChange={handleSortChange}
 					onCreateJiraTicket={handleCreateJiraTicket}
 					initialSortBy={sortBy}
@@ -876,7 +908,17 @@
 							notes: editingIssue.notes,
 							priority: editingIssue.priority
 						}
-					: undefined}
+					: duplicatingIssueData
+						? {
+								page: duplicatingIssueData.page,
+								criterionNumber: duplicatingIssueData.criterionNumber,
+								title: duplicatingIssueData.title,
+								description: duplicatingIssueData.description,
+								location: duplicatingIssueData.location,
+								notes: duplicatingIssueData.notes,
+								priority: duplicatingIssueData.priority
+							}
+						: undefined}
 			/>
 		</div>
 	</div>

@@ -10,7 +10,9 @@
       "Bash(sudo systemctl daemon-reload:*)",
       "Bash(sudo systemctl restart:*)",
       "Bash(sudo systemctl status:*)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ],
     "deny": [],
     "ask": []

@@ -13,6 +13,7 @@
 		onEdit,
 		onDelete,
 		onCopy,
+		onDuplicate,
 		onSortChange,
 		onCreateJiraTicket,
 		initialSortBy = 'priority'
@@ -21,6 +22,7 @@
 		onEdit: (issue: Issue) => void;
 		onDelete: (issueId: string) => void;
 		onCopy: () => void;
+		onDuplicate: (issue: Issue) => void;
 		onSortChange?: (sortBy: SortBy) => void;
 		onCreateJiraTicket?: (issue: Issue) => void;
 		initialSortBy?: SortBy;
@@ -195,6 +197,15 @@
 									title={`${$t('copyIssue')}: ${issue.title}`}
 								>
 									📋
+								</button>
+								<button
+									type="button"
+									onclick={() => onDuplicate(issue)}
+									class="btn-icon"
+									aria-label={`${$t('duplicateIssue')}: ${issue.title}`}
+									title={`${$t('duplicateIssue')}: ${issue.title}`}
+								>
+									📄
 								</button>
 								<button
 									type="button"
