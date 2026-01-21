@@ -195,7 +195,8 @@ export const translations = {
 		applyFilters: 'Apply Filters',
 		clearFilters: 'Clear Filters',
 		removeAllFilters: 'Remove All Filters',
-		activeFilters: '{count} active'
+		activeFilters: '{count} active',
+		importReport: 'Import Report'
 	},
 	es: {
 		appTitle: 'Gestor de Informes de Accesibilidad',
@@ -393,7 +394,8 @@ export const translations = {
 		applyFilters: 'Aplicar Filtros',
 		clearFilters: 'Limpiar Filtros',
 		removeAllFilters: 'Quitar Todos los Filtros',
-		activeFilters: '{count} activos'
+		activeFilters: '{count} activos',
+		importReport: 'Importar Informe'
 	}
 };
 

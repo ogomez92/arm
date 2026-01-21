@@ -746,6 +746,13 @@
 					</button>
 					<button
 						type="button"
+						onclick={() => fileInput?.click()}
+						class="btn-primary"
+					>
+						{$t('importReport')}
+					</button>
+					<button
+						type="button"
 						onclick={(e) => handleOpenAxeScan(e)}
 						class="btn-secondary"
 						aria-haspopup="dialog"
@@ -803,6 +810,13 @@
 						aria-expanded={showCreateDialog}
 					>
 						{$t('createNewReport')}
+					</button>
+					<button
+						type="button"
+						onclick={() => fileInput?.click()}
+						class="btn-primary"
+					>
+						{$t('importReport')}
 					</button>
 					<button
 						type="button"
