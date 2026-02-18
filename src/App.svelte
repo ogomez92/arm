@@ -4,7 +4,12 @@
 	import type { Report, Issue } from './lib/types';
 	import { ReportStorage } from './lib/services/storage';
 	import { HTMLExport } from './lib/services/html-export';
-	import { generateWeeklyReport, generateCriteriaSummaries, type WeeklyReportTranslations, type CriteriaSummariesTranslations } from './lib/services/weekly-report';
+	import {
+		generateWeeklyReport,
+		generateCriteriaSummaries,
+		type WeeklyReportTranslations,
+		type CriteriaSummariesTranslations
+	} from './lib/services/weekly-report';
 	import { IndexedDBStorage, type SortBy } from './lib/services/indexdb-storage';
 	import type { AxeScanMessage } from './lib/services/axe-snippet';
 	import IssuesTable from './lib/components/IssuesTable.svelte';
@@ -208,9 +213,10 @@
 
 			// Only announce if count changed
 			if (previousFilteredCount !== null && previousFilteredCount !== count) {
-				const message = count === 0
-					? $t('showingNoIssues')
-					: $t('showingIssues').replace('{count}', count.toString());
+				const message =
+					count === 0
+						? $t('showingNoIssues')
+						: $t('showingIssues').replace('{count}', count.toString());
 
 				announcement = message;
 				setTimeout(() => {
@@ -298,6 +304,51 @@
 		issueFormTriggerElement = e.target as HTMLElement;
 		showAddForm = true;
 		editingIssue = null;
+	}
+
+	function handleGlobalKeydown(e: KeyboardEvent) {
+		if (!e.ctrlKey) return;
+
+		switch (e.key) {
+			case 'n':
+				e.preventDefault();
+				if (!showAddForm) {
+					issueFormTriggerElement = addIssueButton ?? null;
+					showAddForm = true;
+					editingIssue = null;
+				}
+				break;
+			case 's':
+				e.preventDefault();
+				downloadJSON();
+				break;
+			case 'c':
+				e.preventDefault();
+				showCreateDialog = true;
+				newReportName = '';
+				setTimeout(() => reportNameInput?.focus(), 0);
+				break;
+			case 'i':
+				e.preventDefault();
+				fileInput?.click();
+				break;
+			case 'a':
+				e.preventDefault();
+				showAxeScanDialog = true;
+				break;
+			case 'm':
+				e.preventDefault();
+				showMergeReportsModal = true;
+				break;
+			case 'u':
+				e.preventDefault();
+				copyCriteriaSummaries();
+				break;
+			case 'f':
+				e.preventDefault();
+				showFiltersModal = true;
+				break;
+		}
 	}
 
 	function handleEditIssue(issue: Issue, e?: Event) {
@@ -574,7 +625,11 @@
 		jiraIssueToCreate = issue;
 
 		// Check if Jira is configured
-		if (!report?.jiraConfig?.baseUrl || !report?.jiraConfig?.apiToken || !report?.jiraConfig?.userEmail) {
+		if (
+			!report?.jiraConfig?.baseUrl ||
+			!report?.jiraConfig?.apiToken ||
+			!report?.jiraConfig?.userEmail
+		) {
 			// Need to configure Jira first
 			pendingJiraAction = true;
 			showJiraConfigModal = true;
@@ -713,6 +768,8 @@
 	}
 </script>
 
+<svelte:window onkeydown={handleGlobalKeydown} />
+
 <Announcer bind:message={announcement} />
 
 <div class="app">
@@ -735,40 +792,56 @@
 				<h2>{$t('noReportLoaded')}</h2>
 
 				<div class="welcome-actions">
-					<button
-						type="button"
-						onclick={(e) => showCreateNewDialog(e)}
-						class="btn-primary"
-						aria-haspopup="dialog"
-						aria-expanded={showCreateDialog}
-					>
-						{$t('createNewReport')}
-					</button>
-					<button
-						type="button"
-						onclick={() => fileInput?.click()}
-						class="btn-primary"
-					>
-						{$t('importReport')}
-					</button>
-					<button
-						type="button"
-						onclick={(e) => handleOpenAxeScan(e)}
-						class="btn-secondary"
-						aria-haspopup="dialog"
-						aria-expanded={showAxeScanDialog}
-					>
-						{$t('scanWithAxe')}
-					</button>
-					<button
-						type="button"
-						onclick={(e) => handleOpenMergeReports(e)}
-						class="btn-secondary"
-						aria-haspopup="dialog"
-						aria-expanded={showMergeReportsModal}
-					>
-						{$t('mergeReports')}
-					</button>
+					<span class="shortcut-wrapper">
+						<button
+							type="button"
+							onclick={(e) => showCreateNewDialog(e)}
+							class="btn-primary"
+							aria-haspopup="dialog"
+							aria-expanded={showCreateDialog}
+							aria-describedby="shortcut-create-report-w"
+						>
+							{$t('createNewReport')}
+						</button>
+						<kbd id="shortcut-create-report-w" class="shortcut-hint" role="tooltip">Ctrl+C</kbd>
+					</span>
+					<span class="shortcut-wrapper">
+						<button
+							type="button"
+							onclick={() => fileInput?.click()}
+							class="btn-primary"
+							aria-describedby="shortcut-import-w"
+						>
+							{$t('importReport')}
+						</button>
+						<kbd id="shortcut-import-w" class="shortcut-hint" role="tooltip">Ctrl+I</kbd>
+					</span>
+					<span class="shortcut-wrapper">
+						<button
+							type="button"
+							onclick={(e) => handleOpenAxeScan(e)}
+							class="btn-secondary"
+							aria-haspopup="dialog"
+							aria-expanded={showAxeScanDialog}
+							aria-describedby="shortcut-axe-w"
+						>
+							{$t('scanWithAxe')}
+						</button>
+						<kbd id="shortcut-axe-w" class="shortcut-hint" role="tooltip">Ctrl+A</kbd>
+					</span>
+					<span class="shortcut-wrapper">
+						<button
+							type="button"
+							onclick={(e) => handleOpenMergeReports(e)}
+							class="btn-secondary"
+							aria-haspopup="dialog"
+							aria-expanded={showMergeReportsModal}
+							aria-describedby="shortcut-merge-w"
+						>
+							{$t('mergeReports')}
+						</button>
+						<kbd id="shortcut-merge-w" class="shortcut-hint" role="tooltip">Ctrl+M</kbd>
+					</span>
 				</div>
 
 				<div class="onboarding">
@@ -780,11 +853,7 @@
 						<li>{$t('weeklyReports')}</li>
 						<li>
 							{$t('feedbackContact')}
-							<a
-								href="https://linkedin.com/in/ogomez92"
-								target="_blank"
-								rel="noopener noreferrer"
-							>
+							<a href="https://linkedin.com/in/ogomez92" target="_blank" rel="noopener noreferrer">
 								Oriol Gómez Sentís
 							</a>
 							{$t('onLinkedIn')}
@@ -802,41 +871,60 @@
 					</p>
 				</div>
 				<div class="report-actions">
-					<button
-						type="button"
-						onclick={(e) => showCreateNewDialog(e)}
-						class="btn-secondary"
-						aria-haspopup="dialog"
-						aria-expanded={showCreateDialog}
-					>
-						{$t('createNewReport')}
-					</button>
-					<button
-						type="button"
-						onclick={() => fileInput?.click()}
-						class="btn-primary"
-					>
-						{$t('importReport')}
-					</button>
-					<button
-						type="button"
-						onclick={(e) => handleOpenAxeScan(e)}
-						class="btn-secondary"
-						aria-haspopup="dialog"
-						aria-expanded={showAxeScanDialog}
-					>
-						{$t('scanWithAxe')}
-					</button>
-					<button
-						type="button"
-						onclick={(e) => handleOpenMergeReports(e)}
-						class="btn-secondary"
-						aria-haspopup="dialog"
-						aria-expanded={showMergeReportsModal}
-					>
-						{$t('mergeReports')}
-					</button>
-					<ExportDropdown buttonLabel={$t('export')} items={exportMenuItems} />
+					<span class="shortcut-wrapper">
+						<button
+							type="button"
+							onclick={(e) => showCreateNewDialog(e)}
+							class="btn-secondary"
+							aria-haspopup="dialog"
+							aria-expanded={showCreateDialog}
+							aria-describedby="shortcut-create-report"
+						>
+							{$t('createNewReport')}
+						</button>
+						<kbd id="shortcut-create-report" class="shortcut-hint" role="tooltip">Ctrl+C</kbd>
+					</span>
+					<span class="shortcut-wrapper">
+						<button
+							type="button"
+							onclick={() => fileInput?.click()}
+							class="btn-primary"
+							aria-describedby="shortcut-import"
+						>
+							{$t('importReport')}
+						</button>
+						<kbd id="shortcut-import" class="shortcut-hint" role="tooltip">Ctrl+I</kbd>
+					</span>
+					<span class="shortcut-wrapper">
+						<button
+							type="button"
+							onclick={(e) => handleOpenAxeScan(e)}
+							class="btn-secondary"
+							aria-haspopup="dialog"
+							aria-expanded={showAxeScanDialog}
+							aria-describedby="shortcut-axe"
+						>
+							{$t('scanWithAxe')}
+						</button>
+						<kbd id="shortcut-axe" class="shortcut-hint" role="tooltip">Ctrl+A</kbd>
+					</span>
+					<span class="shortcut-wrapper">
+						<button
+							type="button"
+							onclick={(e) => handleOpenMergeReports(e)}
+							class="btn-secondary"
+							aria-haspopup="dialog"
+							aria-expanded={showMergeReportsModal}
+							aria-describedby="shortcut-merge"
+						>
+							{$t('mergeReports')}
+						</button>
+						<kbd id="shortcut-merge" class="shortcut-hint" role="tooltip">Ctrl+M</kbd>
+					</span>
+					<span class="shortcut-wrapper">
+						<ExportDropdown buttonLabel={$t('export')} items={exportMenuItems} />
+						<kbd class="shortcut-hint" role="tooltip">Ctrl+S</kbd>
+					</span>
 					<button
 						type="button"
 						onclick={(e) => showWeeklyReportModal(e)}
@@ -846,42 +934,55 @@
 					>
 						{$t('copyWeeklyReport')}
 					</button>
-					<button
-						type="button"
-						onclick={copyCriteriaSummaries}
-						class="btn-secondary"
-					>
-						{$t('copyCriteriaSummaries')}
-					</button>
+					<span class="shortcut-wrapper">
+						<button
+							type="button"
+							onclick={copyCriteriaSummaries}
+							class="btn-secondary"
+							aria-describedby="shortcut-criteria"
+						>
+							{$t('copyCriteriaSummaries')}
+						</button>
+						<kbd id="shortcut-criteria" class="shortcut-hint" role="tooltip">Ctrl+U</kbd>
+					</span>
 				</div>
 			</div>
 
 			<div class="controls">
-				<button
-					type="button"
-					onclick={(e) => handleOpenFilters(e)}
-					class="btn-secondary"
-					aria-haspopup="dialog"
-					aria-expanded={showFiltersModal}
-				>
-					{$t('filters')}
-					{#if activeFilterCount > 0}
-						<span class="filter-badge">({$t('activeFilters').replace('{count}', activeFilterCount.toString())})</span>
-					{/if}
-				</button>
+				<span class="shortcut-wrapper">
+					<button
+						type="button"
+						onclick={(e) => handleOpenFilters(e)}
+						class="btn-secondary"
+						aria-haspopup="dialog"
+						aria-expanded={showFiltersModal}
+						aria-describedby="shortcut-filters"
+					>
+						{$t('filters')}
+						{#if activeFilterCount > 0}
+							<span class="filter-badge"
+								>({$t('activeFilters').replace('{count}', activeFilterCount.toString())})</span
+							>
+						{/if}
+					</button>
+					<kbd id="shortcut-filters" class="shortcut-hint" role="tooltip">Ctrl+F</kbd>
+				</span>
 
-			<button
-				type="button"
-				bind:this={addIssueButton}
-				onclick={(e) => handleAddIssue(e)}
-				class="btn-primary"
-				aria-haspopup="dialog"
-				aria-expanded={showAddForm}
-			>
-				{$t('addNewIssue')}
-			</button>
+				<span class="shortcut-wrapper">
+					<button
+						type="button"
+						bind:this={addIssueButton}
+						onclick={(e) => handleAddIssue(e)}
+						class="btn-primary"
+						aria-haspopup="dialog"
+						aria-expanded={showAddForm}
+						aria-describedby="add-issue-shortcut"
+					>
+						{$t('addNewIssue')}
+					</button>
+					<kbd id="add-issue-shortcut" class="shortcut-hint" role="tooltip">Ctrl+N</kbd>
+				</span>
 			</div>
-
 
 			<section class="issues-section" aria-labelledby="issues-title">
 				<h3 id="issues-title" class="sr-only">{$t('issuesFound')}</h3>
@@ -1071,26 +1172,19 @@
 {/if}
 
 {#if showMergeReportsModal}
-	<MergeReportsModal
-		onMerge={handleMergeReportsComplete}
-		onCancel={handleMergeReportsCancel}
-	/>
+	<MergeReportsModal onMerge={handleMergeReportsComplete} onCancel={handleMergeReportsCancel} />
 {/if}
 
 {#if showFiltersModal && report}
-	<FiltersModal
-		availablePages={report.pages}
-		bind:filters
-		onClose={handleCloseFilters}
-	/>
+	<FiltersModal availablePages={report.pages} bind:filters onClose={handleCloseFilters} />
 {/if}
 
 <style>
 	:global(body) {
 		margin: 0;
 		padding: 0;
-		font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
-			sans-serif;
+		font-family:
+			-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 		color: #212529;
 		background-color: #f8f9fa;
 		line-height: 1.6;
@@ -1303,6 +1397,36 @@
 		box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.5);
 	}
 
+	.shortcut-wrapper {
+		position: relative;
+		display: inline-block;
+	}
+
+	.shortcut-hint {
+		position: absolute;
+		bottom: 100%;
+		left: 50%;
+		transform: translateX(-50%);
+		margin-bottom: 6px;
+		padding: 0.25em 0.5em;
+		font-size: 0.75rem;
+		font-family: inherit;
+		line-height: 1;
+		white-space: nowrap;
+		color: #fff;
+		background: #333;
+		border: 1px solid #555;
+		border-radius: 4px;
+		opacity: 0;
+		pointer-events: none;
+		transition: opacity 0.15s;
+	}
+
+	.shortcut-wrapper:hover .shortcut-hint,
+	.shortcut-wrapper:focus-within .shortcut-hint {
+		opacity: 1;
+	}
+
 	.btn-secondary {
 		background-color: #6c757d;
 		color: #ffffff;
@@ -1345,7 +1469,9 @@
 		width: 100%;
 		max-height: calc(100vh - 2rem);
 		overflow-y: auto;
-		box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15), 0 2px 8px rgba(0, 0, 0, 0.1);
+		box-shadow:
+			0 8px 32px rgba(0, 0, 0, 0.15),
+			0 2px 8px rgba(0, 0, 0, 0.1);
 		margin: auto;
 	}
 
@@ -1377,7 +1503,9 @@
 		font-size: 1rem;
 		border: 2px solid #ced4da;
 		border-radius: 6px;
-		transition: border-color 0.2s, box-shadow 0.2s;
+		transition:
+			border-color 0.2s,
+			box-shadow 0.2s;
 		box-sizing: border-box;
 	}
 
