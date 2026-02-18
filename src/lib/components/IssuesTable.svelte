@@ -124,7 +124,9 @@
 							{#if criterion}
 								<div class="criterion-cell">
 									<strong>{criterion.number}</strong>
-									<span class="criterion-title">{getWCAGCriterionTitle(criterion.number, $currentLanguage)}</span>
+									<span class="criterion-title"
+										>{getWCAGCriterionTitle(criterion.number, $currentLanguage)}</span
+									>
 									<span class="criterion-level level-{criterion.level.toLowerCase()}"
 										>{criterion.level}</span
 									>
@@ -136,8 +138,10 @@
 						<td data-label={$t('issueTitle')}>
 							<div class="issue-title-cell" class:needs-review={issue.needsReview}>
 								<strong
-									aria-label={issue.needsReview ? `${$t('needsReviewPrefix')} ${issue.title}` : issue.title}
-								>{issue.title}</strong>
+									aria-label={issue.needsReview
+										? `${$t('needsReviewPrefix')} ${issue.title}`
+										: issue.title}>{issue.title}</strong
+								>
 								<p class="description">{issue.description}</p>
 								{#if issue.screenshot}
 									<span class="has-screenshot" aria-hidden="true">📷</span>

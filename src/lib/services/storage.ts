@@ -80,9 +80,7 @@ export class ReportStorage {
 			updatedAt: now
 		};
 
-		const pages = report.pages.includes(issue.page)
-			? report.pages
-			: [...report.pages, issue.page];
+		const pages = report.pages.includes(issue.page) ? report.pages : [...report.pages, issue.page];
 
 		return {
 			...report,

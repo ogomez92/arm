@@ -84,12 +84,7 @@
 	>
 		<div class="dialog-header">
 			<h2 id="dialog-title">{$t('axeScanTitle')}</h2>
-			<button
-				class="close-button"
-				onclick={onClose}
-				aria-label={$t('closeDialog')}
-				type="button"
-			>
+			<button class="close-button" onclick={onClose} aria-label={$t('closeDialog')} type="button">
 				×
 			</button>
 		</div>

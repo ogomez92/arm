@@ -82,8 +82,10 @@ export const translations = {
 		aboutThisApp: 'About this app',
 		savedLocally: 'Your reports are saved locally in your browser using IndexedDB',
 		downloadOptions: 'You can download your reports as JSON or HTML at any time',
-		noServerStorage: 'Your data is never sent to or saved on any server - everything stays on your device',
-		weeklyReports: 'Generate weekly reports that you can copy and paste into Slack, Teams, or any other messaging platform',
+		noServerStorage:
+			'Your data is never sent to or saved on any server - everything stays on your device',
+		weeklyReports:
+			'Generate weekly reports that you can copy and paste into Slack, Teams, or any other messaging platform',
 		feedbackContact: 'For feedback or questions, reach out to',
 		onLinkedIn: 'on LinkedIn',
 		scanWithAxe: 'Scan URL with axe-core',
@@ -130,7 +132,8 @@ export const translations = {
 		jiraUserEmail: 'Email',
 		jiraUserEmailPlaceholder: 'your.email@company.com',
 		jiraUserEmailHelp: 'The email associated with your Jira account',
-		jiraProxyDisclaimer: 'Privacy Notice: Requests are routed through a web server to bypass browser security restrictions (CORS). No data is collected, logged, or stored by the proxy server. All requests are forwarded directly to Jira and responses are returned immediately to your browser.',
+		jiraProxyDisclaimer:
+			'Privacy Notice: Requests are routed through a web server to bypass browser security restrictions (CORS). No data is collected, logged, or stored by the proxy server. All requests are forwarded directly to Jira and responses are returned immediately to your browser.',
 		jiraProjectKey: 'Project Key',
 		jiraProjectKeyPlaceholder: 'PROJ',
 		jiraProjectKeyHelp: 'The project key where tickets will be created (e.g., PROJ)',
@@ -164,7 +167,8 @@ export const translations = {
 		// Merge Reports
 		mergeReports: 'Merge Reports',
 		mergeReportsTitle: 'Merge Two Reports',
-		mergeReportsDescription: 'Upload two report files to combine them into a single report. All issues and pages from both reports will be merged.',
+		mergeReportsDescription:
+			'Upload two report files to combine them into a single report. All issues and pages from both reports will be merged.',
 		firstReport: 'First Report',
 		secondReport: 'Second Report',
 		mergedReportTitle: 'Merged Report Title',
@@ -281,19 +285,23 @@ export const translations = {
 		aboutThisApp: 'Acerca de esta aplicación',
 		savedLocally: 'Tus informes se guardan localmente en tu navegador usando IndexedDB',
 		downloadOptions: 'Puedes descargar tus informes como JSON o HTML en cualquier momento',
-		noServerStorage: 'Tus datos nunca se envían ni se guardan en ningún servidor - todo permanece en tu dispositivo',
-		weeklyReports: 'Genera informes semanales que puedes copiar y pegar en Slack, Teams o cualquier otra plataforma de mensajería',
+		noServerStorage:
+			'Tus datos nunca se envían ni se guardan en ningún servidor - todo permanece en tu dispositivo',
+		weeklyReports:
+			'Genera informes semanales que puedes copiar y pegar en Slack, Teams o cualquier otra plataforma de mensajería',
 		feedbackContact: 'Para comentarios o preguntas, contacta a',
 		onLinkedIn: 'en LinkedIn',
 		scanWithAxe: 'Escanear URL con axe-core',
 		axeScanTitle: 'Escanear una página web en busca de problemas de accesibilidad',
-		axeScanInstructions: 'Para escanear cualquier página web en busca de problemas de accesibilidad:',
+		axeScanInstructions:
+			'Para escanear cualquier página web en busca de problemas de accesibilidad:',
 		axeScanStep1: 'Abre la página web que deseas probar en una nueva pestaña del navegador',
 		axeScanStep2: 'Abre las Herramientas de Desarrollo del navegador (presiona F12)',
 		axeScanStep3: 'Ve a la pestaña Consola',
 		axeScanStep4: 'Copia el fragmento de código a continuación y pégalo en la consola',
 		axeScanStep5: 'Presiona Enter para ejecutar el escaneo',
-		axeScanStep6: 'Los resultados se descargarán como un archivo JSON. Impórtalos usando el botón a continuación.',
+		axeScanStep6:
+			'Los resultados se descargarán como un archivo JSON. Impórtalos usando el botón a continuación.',
 		copySnippet: 'Copiar Fragmento de Código',
 		snippetCopied: '¡Fragmento de código copiado al portapapeles!',
 		orImportResults: 'O importa resultados de escaneo descargados previamente:',
@@ -329,7 +337,8 @@ export const translations = {
 		jiraUserEmail: 'Correo electrónico',
 		jiraUserEmailPlaceholder: 'tu.correo@empresa.com',
 		jiraUserEmailHelp: 'El correo electrónico asociado a tu cuenta de Jira',
-		jiraProxyDisclaimer: 'Aviso de Privacidad: Las solicitudes se enrutan a través de un servidor web para evitar las restricciones de seguridad del navegador (CORS). El servidor proxy no recopila, registra ni almacena ningún dato. Todas las solicitudes se reenvían directamente a Jira y las respuestas se devuelven inmediatamente a tu navegador.',
+		jiraProxyDisclaimer:
+			'Aviso de Privacidad: Las solicitudes se enrutan a través de un servidor web para evitar las restricciones de seguridad del navegador (CORS). El servidor proxy no recopila, registra ni almacena ningún dato. Todas las solicitudes se reenvían directamente a Jira y las respuestas se devuelven inmediatamente a tu navegador.',
 		jiraProjectKey: 'Clave del Proyecto',
 		jiraProjectKeyPlaceholder: 'PROY',
 		jiraProjectKeyHelp: 'La clave del proyecto donde se crearán los tickets (ej: PROY)',
@@ -363,7 +372,8 @@ export const translations = {
 		// Merge Reports
 		mergeReports: 'Combinar Informes',
 		mergeReportsTitle: 'Combinar Dos Informes',
-		mergeReportsDescription: 'Sube dos archivos de informe para combinarlos en un solo informe. Todos los problemas y páginas de ambos informes serán combinados.',
+		mergeReportsDescription:
+			'Sube dos archivos de informe para combinarlos en un solo informe. Todos los problemas y páginas de ambos informes serán combinados.',
 		firstReport: 'Primer Informe',
 		secondReport: 'Segundo Informe',
 		mergedReportTitle: 'Título del Informe Combinado',

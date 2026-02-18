@@ -242,11 +242,7 @@
 		<label for="location">
 			{$t('issueLocation')} <span class="optional-indicator">({$t('optional')})</span>
 		</label>
-		<textarea
-			id="location"
-			bind:value={formData.location}
-			rows="3"
-		></textarea>
+		<textarea id="location" bind:value={formData.location} rows="3"></textarea>
 	</div>
 
 	<div class="form-group">
@@ -294,10 +290,7 @@
 
 	<div class="form-group checkbox-group">
 		<label class="checkbox-label">
-			<input
-				type="checkbox"
-				bind:checked={formData.needsReview}
-			/>
+			<input type="checkbox" bind:checked={formData.needsReview} />
 			{$t('needsReview')}
 		</label>
 	</div>
@@ -351,7 +344,9 @@
 		border: 2px solid #ced4da;
 		border-radius: 6px;
 		font-family: inherit;
-		transition: border-color 0.2s, box-shadow 0.2s;
+		transition:
+			border-color 0.2s,
+			box-shadow 0.2s;
 		box-sizing: border-box;
 	}
 

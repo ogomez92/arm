@@ -243,7 +243,9 @@
 		border: 2px solid #ced4da;
 		border-radius: 6px;
 		font-family: inherit;
-		transition: border-color 0.2s, box-shadow 0.2s;
+		transition:
+			border-color 0.2s,
+			box-shadow 0.2s;
 		box-sizing: border-box;
 	}
 

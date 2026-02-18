@@ -205,166 +205,169 @@
 </script>
 
 <div class="results-overlay">
-<div class="results-page">
-	<div class="header">
-		<h1>{$t('axeResultsTitle')}</h1>
-		<div class="header-info">
-			<div class="scan-url">
-				<strong>{$t('scanUrl')}:</strong>
-				<a href={scanData.url} target="_blank" rel="noopener noreferrer">{scanData.url}</a>
-			</div>
-			<div class="issue-count">
-				{selectedCount} / {issues.length} {$t('issuesDetected')}
+	<div class="results-page">
+		<div class="header">
+			<h1>{$t('axeResultsTitle')}</h1>
+			<div class="header-info">
+				<div class="scan-url">
+					<strong>{$t('scanUrl')}:</strong>
+					<a href={scanData.url} target="_blank" rel="noopener noreferrer">{scanData.url}</a>
+				</div>
+				<div class="issue-count">
+					{selectedCount} / {issues.length}
+					{$t('issuesDetected')}
+				</div>
 			</div>
 		</div>
-	</div>
 
-	<div class="page-title-section">
-		<label for="page-title-input">
-			{$t('pageTitle')}
-		</label>
-		<input
-			id="page-title-input"
-			type="text"
-			bind:this={pageTitleInput}
-			bind:value={pageTitle}
-			placeholder={$t('pageTitlePlaceholder')}
-		/>
-	</div>
+		<div class="page-title-section">
+			<label for="page-title-input">
+				{$t('pageTitle')}
+			</label>
+			<input
+				id="page-title-input"
+				type="text"
+				bind:this={pageTitleInput}
+				bind:value={pageTitle}
+				placeholder={$t('pageTitlePlaceholder')}
+			/>
+		</div>
 
-	<div class="controls">
-		<button class="select-button" onclick={() => toggleAll(true)} type="button">
-			{$t('selectAll')}
-		</button>
-		<button class="select-button" onclick={() => toggleAll(false)} type="button">
-			{$t('deselectAll')}
-		</button>
-	</div>
+		<div class="controls">
+			<button class="select-button" onclick={() => toggleAll(true)} type="button">
+				{$t('selectAll')}
+			</button>
+			<button class="select-button" onclick={() => toggleAll(false)} type="button">
+				{$t('deselectAll')}
+			</button>
+		</div>
 
-	<div class="issues-container">
-		{#each issues as issue, index (index)}
-			<div class="issue-card" class:unselected={!issue.selected}>
-				<div class="issue-header">
-					<label class="checkbox-label">
-						<input
-							type="checkbox"
-							bind:checked={issue.selected}
-							aria-label="{$t('keepIssue')} {index + 1}: {issue.title}"
-						/>
-						<span class="issue-info">
-							<span class="issue-number">#{index + 1}</span>
-							<span class="issue-title-preview">{issue.title}</span>
-						</span>
-					</label>
-					<span class="impact-badge impact-{issue.impact}">{issue.impact}</span>
-				</div>
+		<div class="issues-container">
+			{#each issues as issue, index (index)}
+				<div class="issue-card" class:unselected={!issue.selected}>
+					<div class="issue-header">
+						<label class="checkbox-label">
+							<input
+								type="checkbox"
+								bind:checked={issue.selected}
+								aria-label="{$t('keepIssue')} {index + 1}: {issue.title}"
+							/>
+							<span class="issue-info">
+								<span class="issue-number">#{index + 1}</span>
+								<span class="issue-title-preview">{issue.title}</span>
+							</span>
+						</label>
+						<span class="impact-badge impact-{issue.impact}">{issue.impact}</span>
+					</div>
 
-				{#if issue.selected}
-				<div class="issue-field">
-					<label for="criterion-{index}">
-						{$t('wcagCriterion')}
-					</label>
-					<select id="criterion-{index}" bind:value={issue.criterionNumber}>
-						<option value="">{$t('selectCriterion')}</option>
-						{#each wcagCriteria as criterion}
-							<option value={criterion.number}>
-								{criterion.number} - {criterion.title} ({criterion.level})
-							</option>
-						{/each}
-					</select>
-				</div>
+					{#if issue.selected}
+						<div class="issue-field">
+							<label for="criterion-{index}">
+								{$t('wcagCriterion')}
+							</label>
+							<select id="criterion-{index}" bind:value={issue.criterionNumber}>
+								<option value="">{$t('selectCriterion')}</option>
+								{#each wcagCriteria as criterion}
+									<option value={criterion.number}>
+										{criterion.number} - {criterion.title} ({criterion.level})
+									</option>
+								{/each}
+							</select>
+						</div>
 
-				<div class="issue-field">
-					<label for="priority-{index}">
-						{$t('priority')}
-					</label>
-					<select id="priority-{index}" bind:value={issue.priority}>
-						<option value={1}>{$t('priorityLow')}</option>
-						<option value={2}>{$t('priorityMedium')}</option>
-						<option value={3}>{$t('priorityBlocker')}</option>
-					</select>
-				</div>
+						<div class="issue-field">
+							<label for="priority-{index}">
+								{$t('priority')}
+							</label>
+							<select id="priority-{index}" bind:value={issue.priority}>
+								<option value={1}>{$t('priorityLow')}</option>
+								<option value={2}>{$t('priorityMedium')}</option>
+								<option value={3}>{$t('priorityBlocker')}</option>
+							</select>
+						</div>
 
-				<div class="issue-field">
-					<label for="title-{index}">
-						{$t('issueTitle')}
-					</label>
-					<input id="title-{index}" type="text" bind:value={issue.title} />
-				</div>
+						<div class="issue-field">
+							<label for="title-{index}">
+								{$t('issueTitle')}
+							</label>
+							<input id="title-{index}" type="text" bind:value={issue.title} />
+						</div>
 
-				<div class="issue-field">
-					<label for="description-{index}">
-						{$t('issueDescription')}
-					</label>
-					<textarea id="description-{index}" bind:value={issue.description} rows="4"></textarea>
-				</div>
+						<div class="issue-field">
+							<label for="description-{index}">
+								{$t('issueDescription')}
+							</label>
+							<textarea id="description-{index}" bind:value={issue.description} rows="4"></textarea>
+						</div>
 
-				<div class="issue-field">
-					<label for="location-{index}">
-						{$t('issueLocation')}
-					</label>
-					<textarea id="location-{index}" bind:value={issue.location} rows="5"></textarea>
-				</div>
+						<div class="issue-field">
+							<label for="location-{index}">
+								{$t('issueLocation')}
+							</label>
+							<textarea id="location-{index}" bind:value={issue.location} rows="5"></textarea>
+						</div>
 
-				<div class="issue-field">
-					<label for="screenshot-{index}">
-						{$t('screenshot')} <span class="optional-indicator">({$t('optional')})</span>
-					</label>
-					<input
-						type="file"
-						id="screenshot-{index}"
-						accept="image/*"
-						onchange={(e) => handleScreenshotChange(e, index)}
-						aria-describedby="screenshot-help-{index}"
-					/>
-					<div id="screenshot-help-{index}" class="help-text">{$t('screenshotHelp')}</div>
-					{#if issue.screenshot}
-						<div class="screenshot-preview">
-							<img src={issue.screenshot} alt={issue.title} />
-							<button
-								type="button"
-								onclick={(e) => {
-									const input = document.getElementById(`screenshot-${index}`) as HTMLInputElement;
-									removeScreenshot(index, input);
-								}}
-								class="remove-screenshot-btn"
-							>
-								{$t('removeScreenshot')}
-							</button>
+						<div class="issue-field">
+							<label for="screenshot-{index}">
+								{$t('screenshot')} <span class="optional-indicator">({$t('optional')})</span>
+							</label>
+							<input
+								type="file"
+								id="screenshot-{index}"
+								accept="image/*"
+								onchange={(e) => handleScreenshotChange(e, index)}
+								aria-describedby="screenshot-help-{index}"
+							/>
+							<div id="screenshot-help-{index}" class="help-text">{$t('screenshotHelp')}</div>
+							{#if issue.screenshot}
+								<div class="screenshot-preview">
+									<img src={issue.screenshot} alt={issue.title} />
+									<button
+										type="button"
+										onclick={(e) => {
+											const input = document.getElementById(
+												`screenshot-${index}`
+											) as HTMLInputElement;
+											removeScreenshot(index, input);
+										}}
+										class="remove-screenshot-btn"
+									>
+										{$t('removeScreenshot')}
+									</button>
+								</div>
+							{/if}
+						</div>
+
+						<div class="issue-field">
+							<label for="notes-{index}">
+								{$t('notesAndSolutions')}
+							</label>
+							<textarea id="notes-{index}" bind:value={issue.notes} rows="4"></textarea>
+						</div>
+
+						{#if issue.accessibilityText}
+							<div class="issue-field">
+								<div class="field-label">{$t('wcagTags')}</div>
+								<div class="readonly-text">{issue.accessibilityText}</div>
+							</div>
+						{/if}
+
+						<div class="issue-field">
+							<div class="field-label">{$t('helpUrl')}</div>
+							<a href={issue.helpUrl} target="_blank" rel="noopener noreferrer" class="help-link">
+								{issue.helpUrl}
+							</a>
 						</div>
 					{/if}
 				</div>
+			{/each}
+		</div>
 
-				<div class="issue-field">
-					<label for="notes-{index}">
-						{$t('notesAndSolutions')}
-					</label>
-					<textarea id="notes-{index}" bind:value={issue.notes} rows="4"></textarea>
-				</div>
-
-				{#if issue.accessibilityText}
-					<div class="issue-field">
-						<div class="field-label">{$t('wcagTags')}</div>
-						<div class="readonly-text">{issue.accessibilityText}</div>
-					</div>
-				{/if}
-
-				<div class="issue-field">
-					<div class="field-label">{$t('helpUrl')}</div>
-					<a href={issue.helpUrl} target="_blank" rel="noopener noreferrer" class="help-link">
-						{issue.helpUrl}
-					</a>
-				</div>
-				{/if}
-			</div>
-		{/each}
+		<div class="actions">
+			<button class="save-button" onclick={handleSave} type="button">{$t('save')}</button>
+			<button class="cancel-button" onclick={onCancel} type="button">{$t('cancel')}</button>
+		</div>
 	</div>
-
-	<div class="actions">
-		<button class="save-button" onclick={handleSave} type="button">{$t('save')}</button>
-		<button class="cancel-button" onclick={onCancel} type="button">{$t('cancel')}</button>
-	</div>
-</div>
 </div>
 
 <style>

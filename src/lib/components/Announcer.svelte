@@ -2,12 +2,7 @@
 	let { message = $bindable('') } = $props();
 </script>
 
-<div
-	class="sr-only"
-	role="status"
-	aria-live="polite"
-	aria-atomic="true"
->
+<div class="sr-only" role="status" aria-live="polite" aria-atomic="true">
 	{message}
 </div>
 

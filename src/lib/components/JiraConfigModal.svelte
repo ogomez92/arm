@@ -136,7 +136,12 @@
 >
 	<div class="modal" bind:this={modalElement}>
 		<h2 id="jira-config-title">{$t('jiraConfiguration')}</h2>
-		<form onsubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
+		<form
+			onsubmit={(e) => {
+				e.preventDefault();
+				handleSubmit();
+			}}
+		>
 			<div class="form-group">
 				<label for="jiraBaseUrl">{$t('jiraBaseUrl')} <span class="required">*</span></label>
 				<input

@@ -16,7 +16,7 @@ export function getWeekRange(weekOffset: number = 0): { start: Date; end: Date }
 
 	// Apply week offset
 	const start = new Date(startOfCurrentWeek);
-	start.setDate(startOfCurrentWeek.getDate() + (weekOffset * 7));
+	start.setDate(startOfCurrentWeek.getDate() + weekOffset * 7);
 
 	// End of week is Saturday 23:59:59
 	const end = new Date(start);
@@ -30,7 +30,7 @@ export function getWeekRange(weekOffset: number = 0): { start: Date; end: Date }
  * Filter issues by date range
  */
 export function filterIssuesByDateRange(issues: Issue[], start: Date, end: Date): Issue[] {
-	return issues.filter(issue => {
+	return issues.filter((issue) => {
 		const issueDate = new Date(issue.createdAt);
 		return issueDate >= start && issueDate <= end;
 	});
@@ -47,14 +47,17 @@ export function getWeeklyIssues(issues: Issue[], weekOffset: number = 0): Issue[
 /**
  * Calculate percentage of issues by criterion
  */
-export function calculateCriteriaPercentages(issues: Issue[], language: Language = 'en'): Map<string, { count: number; percentage: number; name: string }> {
+export function calculateCriteriaPercentages(
+	issues: Issue[],
+	language: Language = 'en'
+): Map<string, { count: number; percentage: number; name: string }> {
 	const total = issues.length;
 	if (total === 0) return new Map();
 
 	const criteriaCounts = new Map<string, number>();
 
 	// Count issues by criterion
-	issues.forEach(issue => {
+	issues.forEach((issue) => {
 		const count = criteriaCounts.get(issue.criterionNumber) || 0;
 		criteriaCounts.set(issue.criterionNumber, count + 1);
 	});
@@ -63,7 +66,7 @@ export function calculateCriteriaPercentages(issues: Issue[], language: Language
 	const result = new Map<string, { count: number; percentage: number; name: string }>();
 	criteriaCounts.forEach((count, criterionNumber) => {
 		const percentage = Math.round((count / total) * 100);
-		const criterion = wcagCriteria.find(c => c.number === criterionNumber);
+		const criterion = wcagCriteria.find((c) => c.number === criterionNumber);
 		const name = criterion ? (language === 'es' ? criterion.titleEs : criterion.title) : '';
 		result.set(criterionNumber, { count, percentage, name });
 	});
@@ -74,10 +77,14 @@ export function calculateCriteriaPercentages(issues: Issue[], language: Language
 /**
  * Count issues by priority
  */
-export function countIssuesByPriority(issues: Issue[]): { blocker: number; medium: number; low: number } {
+export function countIssuesByPriority(issues: Issue[]): {
+	blocker: number;
+	medium: number;
+	low: number;
+} {
 	const counts = { blocker: 0, medium: 0, low: 0 };
 
-	issues.forEach(issue => {
+	issues.forEach((issue) => {
 		if (issue.priority === 3) {
 			counts.blocker++;
 		} else if (issue.priority === 2) {
@@ -93,7 +100,10 @@ export function countIssuesByPriority(issues: Issue[]): { blocker: number; mediu
 /**
  * Calculate percentage change between two weeks
  */
-export function calculatePercentageChange(currentWeekCount: number, previousWeekCount: number): { direction: 'up' | 'down' | 'same'; percentage: number } {
+export function calculatePercentageChange(
+	currentWeekCount: number,
+	previousWeekCount: number
+): { direction: 'up' | 'down' | 'same'; percentage: number } {
 	if (previousWeekCount === 0) {
 		return { direction: currentWeekCount > 0 ? 'up' : 'same', percentage: 100 };
 	}
@@ -214,7 +224,7 @@ export function generateCriteriaSummaries(
 	// Group issues by criterion number
 	const issuesByCriterion = new Map<string, Issue[]>();
 
-	report.issues.forEach(issue => {
+	report.issues.forEach((issue) => {
 		const issues = issuesByCriterion.get(issue.criterionNumber) || [];
 		issues.push(issue);
 		issuesByCriterion.set(issue.criterionNumber, issues);
@@ -227,19 +237,23 @@ export function generateCriteriaSummaries(
 
 	const summaries: string[] = [];
 
-	sortedCriteria.forEach(criterionNumber => {
+	sortedCriteria.forEach((criterionNumber) => {
 		const issues = issuesByCriterion.get(criterionNumber) || [];
 
 		// Get criterion name
-		const criterion = wcagCriteria.find(c => c.number === criterionNumber);
-		const criterionName = criterion ? (language === 'es' ? criterion.titleEs : criterion.title) : '';
+		const criterion = wcagCriteria.find((c) => c.number === criterionNumber);
+		const criterionName = criterion
+			? language === 'es'
+				? criterion.titleEs
+				: criterion.title
+			: '';
 
 		// Add criterion header
 		let summary = `${criterionNumber} ${criterionName}\n`;
 
 		// Group issues by page
 		const issuesByPage = new Map<string, Issue[]>();
-		issues.forEach(issue => {
+		issues.forEach((issue) => {
 			const pageIssues = issuesByPage.get(issue.page) || [];
 			pageIssues.push(issue);
 			issuesByPage.set(issue.page, pageIssues);
@@ -249,10 +263,12 @@ export function generateCriteriaSummaries(
 		const pageSummaries: string[] = [];
 		issuesByPage.forEach((pageIssues, pageName) => {
 			// Format each issue as "title in location"
-			const issueTexts = pageIssues.map(issue => {
+			const issueTexts = pageIssues.map((issue) => {
 				return issue.location ? `${issue.title} in ${issue.location}` : issue.title;
 			});
-			pageSummaries.push(`${translations.inThe} ${pageName} ${translations.pageWord}, ${issueTexts.join('. ')}`);
+			pageSummaries.push(
+				`${translations.inThe} ${pageName} ${translations.pageWord}, ${issueTexts.join('. ')}`
+			);
 		});
 
 		// Join all page summaries into one paragraph

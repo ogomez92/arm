@@ -2,9 +2,9 @@ import { writable, derived } from 'svelte/store';
 import type { Language } from '../types';
 import { translations, type TranslationKey } from './translations';
 
-const storedLanguage = (typeof localStorage !== 'undefined'
-	? localStorage.getItem('language')
-	: null) as Language | null;
+const storedLanguage = (
+	typeof localStorage !== 'undefined' ? localStorage.getItem('language') : null
+) as Language | null;
 
 export const currentLanguage = writable<Language>(storedLanguage || 'en');
 

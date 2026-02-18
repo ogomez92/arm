@@ -1,7 +1,11 @@
 <script lang="ts">
 	import { t, currentLanguage } from '../i18n';
 	import type { JiraConfig, Issue } from '../types';
-	import { JiraService, type JiraCreateIssueResponse, type JiraUrlParseResult } from '../services/jira';
+	import {
+		JiraService,
+		type JiraCreateIssueResponse,
+		type JiraUrlParseResult
+	} from '../services/jira';
 
 	let {
 		issue,
@@ -18,7 +22,11 @@
 	} = $props();
 
 	// Initialize from issue data
-	const initialData = JiraService.issueToJiraData(issue, jiraConfig.projectKey || '', $currentLanguage);
+	const initialData = JiraService.issueToJiraData(
+		issue,
+		jiraConfig.projectKey || '',
+		$currentLanguage
+	);
 
 	let jiraUrlInput = $state(jiraConfig.projectKey || '');
 	let parsedResult = $state<JiraUrlParseResult | null>(null);
@@ -164,12 +172,7 @@
 					<span class="success-icon" aria-hidden="true">&#10003;</span>
 					<p>{$t('jiraTicketCreatedWithKey').replace('{key}', createdTicket.key)}</p>
 				</div>
-				<a
-					href={ticketUrl}
-					target="_blank"
-					rel="noopener noreferrer"
-					class="ticket-link"
-				>
+				<a href={ticketUrl} target="_blank" rel="noopener noreferrer" class="ticket-link">
 					{$t('jiraViewTicket')}: {createdTicket.key}
 				</a>
 				<div class="modal-actions">
@@ -180,10 +183,16 @@
 			</div>
 		{:else}
 			<!-- Form State -->
-			<form onsubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
+			<form
+				onsubmit={(e) => {
+					e.preventDefault();
+					handleSubmit();
+				}}
+			>
 				<div class="config-info">
 					<p>
-						<strong>{$t('jiraBaseUrl')}:</strong> {jiraConfig.baseUrl}
+						<strong>{$t('jiraBaseUrl')}:</strong>
+						{jiraConfig.baseUrl}
 						<button type="button" class="btn-link" onclick={onConfigureJira}>
 							({$t('edit')})
 						</button>
@@ -202,35 +211,31 @@
 					/>
 					{#if parsedResult}
 						<p class="detected-info" role="status" aria-live="polite">
-							<strong>Detected:</strong> {parsedResult.label}
+							<strong>Detected:</strong>
+							{parsedResult.label}
 							{#if parsedResult.type === 'epic'}
 								<span class="info-badge">Will link as parent epic</span>
 							{/if}
 						</p>
 					{:else if jiraUrlInput.trim()}
-						<p class="help-text error-text">Could not parse URL. Please enter a valid Jira URL or project key.</p>
+						<p class="help-text error-text">
+							Could not parse URL. Please enter a valid Jira URL or project key.
+						</p>
 					{:else}
-						<p class="help-text">Paste any Jira URL (board, epic, project) or just the project key</p>
+						<p class="help-text">
+							Paste any Jira URL (board, epic, project) or just the project key
+						</p>
 					{/if}
 				</div>
 
 				<div class="form-group">
 					<label for="jiraSummary">{$t('jiraSummary')} <span class="required">*</span></label>
-					<input
-						type="text"
-						id="jiraSummary"
-						bind:value={summary}
-						required
-					/>
+					<input type="text" id="jiraSummary" bind:value={summary} required />
 				</div>
 
 				<div class="form-group">
 					<label for="jiraDescription">{$t('jiraDescription')}</label>
-					<textarea
-						id="jiraDescription"
-						bind:value={description}
-						rows="8"
-					></textarea>
+					<textarea id="jiraDescription" bind:value={description} rows="8"></textarea>
 				</div>
 
 				<div class="form-row">
@@ -268,12 +273,17 @@
 
 				{#if creationResult === 'error'}
 					<div class="error-message" role="alert">
-						<strong>{$t('jiraTicketError')}:</strong> {errorMessage}
+						<strong>{$t('jiraTicketError')}:</strong>
+						{errorMessage}
 					</div>
 				{/if}
 
 				<div class="modal-actions">
-					<button type="submit" class="btn-primary" disabled={isCreating || !parsedResult || !summary}>
+					<button
+						type="submit"
+						class="btn-primary"
+						disabled={isCreating || !parsedResult || !summary}
+					>
 						{isCreating ? $t('jiraCreating') : $t('jiraCreateTicket')}
 					</button>
 					<button type="button" onclick={onCancel} class="btn-secondary" disabled={isCreating}>

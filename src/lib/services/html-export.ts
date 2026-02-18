@@ -9,9 +9,7 @@ type SortBy = 'page' | 'criteria' | 'priority';
 export class HTMLExport {
 	static generateHTML(report: Report, language: 'en' | 'es', sortBy: SortBy = 'priority'): string {
 		const isSpanish = language === 'es';
-		const title = isSpanish
-			? 'Informe de Accesibilidad'
-			: 'Accessibility Report';
+		const title = isSpanish ? 'Informe de Accesibilidad' : 'Accessibility Report';
 		const pageLabel = isSpanish ? 'Página' : 'Page';
 		const criterionLabel = isSpanish ? 'Criterio WCAG' : 'WCAG Criterion';
 		const titleLabel = isSpanish ? 'Título' : 'Title';
@@ -58,14 +56,15 @@ export class HTMLExport {
 						`
 							: '';
 
-						const jiraHTML = issue.jiraTicketUrl && issue.jiraTicketKey
-							? `
+						const jiraHTML =
+							issue.jiraTicketUrl && issue.jiraTicketKey
+								? `
 							<div class="field">
 								<strong>${jiraLabel}:</strong>
 								<a href="${this.escapeHTML(issue.jiraTicketUrl)}" target="_blank" rel="noopener noreferrer" class="jira-link">${this.escapeHTML(issue.jiraTicketKey)}</a>
 							</div>
 						`
-							: '';
+								: '';
 
 						return `
 						<div class="issue-item">

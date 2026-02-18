@@ -120,7 +120,12 @@
 			</div>
 		{/if}
 
-		<form onsubmit={(e) => { e.preventDefault(); handleMerge(); }}>
+		<form
+			onsubmit={(e) => {
+				e.preventDefault();
+				handleMerge();
+			}}
+		>
 			<div class="form-group">
 				<label for="mergedTitle">{$t('mergedReportTitle')}:</label>
 				<input
@@ -154,7 +159,9 @@
 							<span class="report-info">
 								<strong>{report1.name}</strong>
 								<span class="report-meta">
-									{report1.issues.length} {$t('issuesCount')} &bull; {report1.pages.length} {$t('pagesCount')}
+									{report1.issues.length}
+									{$t('issuesCount')} &bull; {report1.pages.length}
+									{$t('pagesCount')}
 								</span>
 							</span>
 						{:else}
@@ -183,7 +190,9 @@
 							<span class="report-info">
 								<strong>{report2.name}</strong>
 								<span class="report-meta">
-									{report2.issues.length} {$t('issuesCount')} &bull; {report2.pages.length} {$t('pagesCount')}
+									{report2.issues.length}
+									{$t('issuesCount')} &bull; {report2.pages.length}
+									{$t('pagesCount')}
 								</span>
 							</span>
 						{:else}
@@ -194,11 +203,7 @@
 			</div>
 
 			<div class="modal-actions">
-				<button
-					type="submit"
-					class="btn-primary"
-					disabled={!canMerge || isLoading}
-				>
+				<button type="submit" class="btn-primary" disabled={!canMerge || isLoading}>
 					{$t('merge')}
 				</button>
 				<button type="button" onclick={onCancel} class="btn-secondary">
@@ -267,17 +272,19 @@
 		color: #212529;
 	}
 
-	.form-group input[type="text"] {
+	.form-group input[type='text'] {
 		width: 100%;
 		padding: 0.75rem 1rem;
 		font-size: 1rem;
 		border: 2px solid #ced4da;
 		border-radius: 6px;
-		transition: border-color 0.2s, box-shadow 0.2s;
+		transition:
+			border-color 0.2s,
+			box-shadow 0.2s;
 		box-sizing: border-box;
 	}
 
-	.form-group input[type="text"]:focus {
+	.form-group input[type='text']:focus {
 		outline: none;
 		border-color: #0066cc;
 		box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.25);
@@ -296,7 +303,9 @@
 		border-radius: 8px;
 		padding: 1.25rem;
 		text-align: center;
-		transition: border-color 0.2s, background-color 0.2s;
+		transition:
+			border-color 0.2s,
+			background-color 0.2s;
 	}
 
 	.upload-card:has(.loaded) {
@@ -463,7 +472,7 @@
 			color: #e9ecef;
 		}
 
-		.form-group input[type="text"] {
+		.form-group input[type='text'] {
 			background-color: #1a1a1a;
 			color: #e9ecef;
 			border-color: #495057;
